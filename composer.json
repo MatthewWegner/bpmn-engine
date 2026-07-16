@@ -1,0 +1,20 @@
+{
+    "name": "matthewwegner/bpmn-engine",
+    "description": "Laravel BPMN Execution Engine",
+    "type": "library",
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0 || ^12.0 || ^13.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "MatthewWegner\\BpmnEngine\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Matthew Wegner",
+            "email": "mwegner@proton.me"
+        }
+    ]
+}
