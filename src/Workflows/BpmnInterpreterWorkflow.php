@@ -4,6 +4,8 @@ namespace MatthewWegner\BpmnEngine\Workflows;
 
 use Workflow\Workflow;
 use Workflow\ActivityStub;
+use Workflow\SignalMethod;
+use function Workflow\await;
 use MatthewWegner\BpmnEngine\Models\WorkflowVersion;
 use MatthewWegner\BpmnEngine\Models\WorkflowEdge;
 use MatthewWegner\BpmnEngine\Services\GatewayRouter;
@@ -11,6 +13,13 @@ use RuntimeException;
 
 class BpmnInterpreterWorkflow extends Workflow
 {
+    // Define a generic signal receiver that pipes data into the durable Inbox
+    #[SignalMethod]
+    public function submitUserTask(array $payload)
+    {
+        $this->inbox->receive($payload);
+    }
+
     public function execute(int $versionId, array $userData)
     {
         // Note: Querying the DB inside a workflow is safe ONLY IF the data is immutable.
@@ -50,6 +59,26 @@ class BpmnInterpreterWorkflow extends Workflow
                 $userData = array_merge($userData, $activityResult);
 
                 // Advance to the next sequential node
+                $currentNodeId = $this->getNextSequentialNode($version, $currentNodeId);
+            }
+
+            // Handle Human Wait States
+            elseif ($node->type === 'userTask') {
+                // Define a clean, deterministic signal signature
+                $signalName = "task_completed_" . $currentNodeId;
+
+                // Hibernate the workflow until the inbox receives an unread message
+                yield await(fn () => $this->inbox->hasUnread());
+
+                // Pop the message out of the inbox securely
+                $signalPayload = $this->inbox->nextUnread();
+
+                // Once resumed, merge the host app's form/button response back into global state
+                if (is_array($signalPayload)) {
+                    $userData = array_merge($userData, $signalPayload);
+                }
+
+                // Advance to the next sequential node in the graph layout
                 $currentNodeId = $this->getNextSequentialNode($version, $currentNodeId);
             }
 
