@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+// use Tests\TestCase;
+use MatthewWegner\BpmnEngine\Tests\TestCase;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,9 +15,9 @@ use Tests\TestCase;
 |
 */
 
-pest()->extend(TestCase::class)
+pest()->extend(MatthewWegner\BpmnEngine\Tests\TestCase::class)
  // ->use(RefreshDatabase::class)
-    ->in('Feature');
+    ->in('Feature', 'Unit');
 
 /*
 |--------------------------------------------------------------------------

@@ -11,6 +11,11 @@
             "MatthewWegner\\BpmnEngine\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "MatthewWegner\\BpmnEngine\\Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "Matthew Wegner",
