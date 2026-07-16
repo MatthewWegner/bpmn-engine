@@ -16,5 +16,15 @@
             "name": "Matthew Wegner",
             "email": "mwegner@proton.me"
         }
-    ]
+    ],
+    "require-dev": {
+        "orchestra/testbench": "^11.1",
+        "pestphp/pest": "^4.7",
+        "pestphp/pest-plugin-laravel": "^4.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
 }
