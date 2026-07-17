@@ -21,7 +21,7 @@
         #control-panel {
             position: absolute;
             top: 20px;
-            right: 20px;
+            right: 400px;
             z-index: 1000;
             background: white;
             padding: 15px;
@@ -47,7 +47,6 @@
         #designer-container {
             display: flex;
             height: 100vh;
-            padding-top: 60px; /* Space for the top bar */
         }
         #canvas {
             flex-grow: 1;
