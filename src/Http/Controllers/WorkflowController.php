@@ -112,9 +112,10 @@ class WorkflowController extends Controller
     protected function getBlankBlueprintXml(): string
     {
         return '<?xml version="1.0" encoding="UTF-8"?>' .
-               '<bpmn:definitions xmlns:bpmn="http://omg.org/spec/BPMN/20100524/MODEL" ' .
-               'xmlns:bpmndi="http://omg.org/spec/BPMN/20100524/DI" ' .
+               '<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" ' . // Added 'www.'
+               'xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" ' .
                'xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" ' .
+               'xmlns:di="http://www.omg.org/spec/DD/20100524/DI" ' . // Added 'di' namespace
                'id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">' .
                '<bpmn:process id="Process_1" isExecutable="true">' .
                '<bpmn:startEvent id="StartEvent_1" />' .

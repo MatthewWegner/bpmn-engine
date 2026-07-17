@@ -59,8 +59,29 @@
     <script src="https://unpkg.com/bpmn-js@17.0.2/dist/bpmn-modeler.development.js"></script>
     
     <script>
-        // Laravel handles quote-wrapping and multi-line escaping perfectly using json
-        const initialXml = @json($xml);
+        // Use a safe JSON-decoding assignment to prevent raw quotes or newlines from breaking JS syntax
+        const dbXml = {!! $xml ? json_encode($xml) : 'null' !!};
+
+        const defaultBlankXml = `<?xml version="1.0" encoding="UTF-8"?>
+        <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" 
+                          xmlns:bpmndi="http://omg.org/spec/BPMN/20100524/DI" 
+                          xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" 
+                          xmlns:di="http://www.omg.org/spec/DD/20100524/DI" 
+                          id="Definitions_1" 
+                          targetNamespace="http://bpmn.io/schema/bpmn">
+          <bpmn:process id="Process_1" isExecutable="true">
+            <bpmn:startEvent id="StartEvent_1" />
+          </bpmn:process>
+          <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+            <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+              <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+                <dc:Bounds x="173" y="102" width="36" height="36" />
+              </bpmndi:BPMNShape>
+            </bpmndi:BPMNPlane>
+          </bpmndi:BPMNDiagram>
+        </bpmn:definitions>`;
+
+        const initialXml = dbXml ? dbXml : defaultBlankXml;
 
         // Initialize the modeler canvas
         const modeler = new BpmnJS({
