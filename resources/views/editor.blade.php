@@ -8,6 +8,8 @@
     <!-- bpmn-js Canvas & Properties styles -->
     <link rel="stylesheet" href="https://unpkg.com/bpmn-js@17.0.2/dist/assets/diagram-js.css" />
     <link rel="stylesheet" href="https://unpkg.com/bpmn-js@17.0.2/dist/assets/bpmn-font/css/bpmn.css" />
+    <!-- Properties Panel CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@bpmn-io/properties-panel/dist/assets/properties-panel.css" />
 
     <style>
         html, body, #canvas {
@@ -42,6 +44,21 @@
         .btn:hover {
             background-color: #4338ca;
         }
+        #designer-container {
+            display: flex;
+            height: 100vh;
+            padding-top: 60px; /* Space for the top bar */
+        }
+        #canvas {
+            flex-grow: 1;
+            background-color: #f8fafc;
+        }
+        #properties-panel {
+            width: 350px;
+            background: #ffffff;
+            border-left: 1px solid #e5e7eb;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -53,10 +70,14 @@
         <button id="save-button" class="btn">Save & Compile</button>
     </div>
 
-    <div id="canvas"></div>
+    <!-- Flex container holding both canvas and properties -->
+    <div id="designer-container">
+        <div id="canvas"></div>
+        <div id="properties-panel"></div>
+    </div>
 
-    <!-- bpmn-js Modeler library -->
-    <script src="https://unpkg.com/bpmn-js@17.0.2/dist/bpmn-modeler.development.js"></script>
+    <!-- Load bpmn-js compiled package asset -->
+    <script src="{{ asset('vendor/bpmn-engine/bpmn-modeler.js') }}"></script>
     
     <script>
         // Use a safe JSON-decoding assignment to prevent raw quotes or newlines from breaking JS syntax
@@ -83,49 +104,23 @@
 
         const initialXml = dbXml ? dbXml : defaultBlankXml;
 
-        // Initialize the modeler canvas
-        const modeler = new BpmnJS({
-            container: '#canvas'
-        });
+        // Initialize our custom bundled modeler
+        window.initBpmnDesigner(initialXml, async (xml) => {
+            const response = await fetch('/api/bpmn/workflows/{{ $definition->id }}/versions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ xml: xml })
+            });
 
-        // Load the initial layout safely
-        async function openDiagram(xml) {
-            try {
-                await modeler.importXML(xml);
-                modeler.get('canvas').zoom('fit-viewport');
-            } catch (err) {
-                console.error('Error rendering diagram:', err);
-                alert('An error occurred while displaying the BPMN canvas. Check browser console.');
-            }
-        }
-
-        openDiagram(initialXml);
-
-        // Capture XML and Post back to your package's REST Controller
-        document.getElementById('save-button').addEventListener('click', async () => {
-            try {
-                const { xml } = await modeler.saveXML({ format: true });
-                
-                const response = await fetch('/api/bpmn/workflows/{{ $definition->id }}/versions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ xml: xml })
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    alert('Workflow saved and compiled successfully! Version: ' + result.version_id);
-                } else {
-                    alert('Compilation failed: ' + result.message);
-                }
-            } catch (err) {
-                console.error('Error saving diagram', err);
-                alert('An error occurred while exporting the XML.');
+            const result = await response.json();
+            if (response.ok) {
+                alert('Workflow saved! Version: ' + result.version_id);
+            } else {
+                alert('Compilation failed: ' + result.message);
             }
         });
     </script>

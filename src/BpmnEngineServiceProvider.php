@@ -28,6 +28,11 @@ class BpmnEngineServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__ . '/../resources/views' => resource_path('views/vendor/bpmn-engine'),
             ], 'bpmn-engine-views');
+            
+            // Publish compiled frontend assets
+            $this->publishes([
+                __DIR__ . '/../public' => public_path('vendor/bpmn-engine'),
+            ], 'bpmn-engine-assets');
         }
     }
 

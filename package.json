@@ -1,0 +1,33 @@
+{
+  "name": "bpmn-engine",
+  "version": "1.0.0",
+  "description": "A lightweight, native PHP workflow orchestrator and visual designer for Laravel. This package allows you to model business processes visually using BPMN 2.0 and execute them as durable, stateful background jobs—without any external Java dependencies (like Camunda or Zeebe).",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MatthewWegner/bpmn-engine.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/MatthewWegner/bpmn-engine/issues"
+  },
+  "homepage": "https://github.com/MatthewWegner/bpmn-engine#readme",
+  "dependencies": {
+    "@bpmn-io/properties-panel": "^3.47.0",
+    "bpmn-js": "^18.21.0",
+    "bpmn-js-properties-panel": "^5.61.0",
+    "camunda-bpmn-moddle": "^7.0.1"
+  },
+  "devDependencies": {
+    "vite": "^8.1.5"
+  }
+}
