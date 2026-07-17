@@ -30,6 +30,20 @@ class TestCase extends Orchestra
 
         // Ensure this uses the database queue
         $app['config']->set('queue.default', 'database');
+
+        // Force all database connections to use memory
+        $app['config']->set('database.default', 'testing');
+        $app['config']->set('database.connections.sqlite.database', ':memory:');
+        $app['config']->set('database.connections.testing', [
+            'driver'   => 'sqlite',
+            'database' => ':memory:',
+            'prefix'   => '',
+        ]);
+
+        // Disable the failed_jobs log provider completely for testing context
+        $app['config']->set('queue.failed', [
+            'driver' => 'null',
+        ]);
     }
 
     /**

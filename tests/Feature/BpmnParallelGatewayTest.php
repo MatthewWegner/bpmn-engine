@@ -66,7 +66,7 @@ it('executes multiple paths in parallel and merges the payload at the join', fun
     // Assertions
     $workflow = WorkflowStub::load($workflow->id());
     
-    expect($workflow->status())->toBe('completed');
+    expect($workflow->status())->toBe(\Workflow\States\WorkflowCompletedStatus::class);
     
     $result = $workflow->output();
     expect($result)->toBeArray()

@@ -4,8 +4,10 @@ namespace MatthewWegner\BpmnEngine\Workflows;
 
 use Workflow\Workflow;
 use Workflow\ActivityStub;
+use Workflow\ChildWorkflowStub;
 use Workflow\SignalMethod;
 use function Workflow\await;
+use function Workflow\all;
 use MatthewWegner\BpmnEngine\Models\WorkflowVersion;
 use MatthewWegner\BpmnEngine\Models\WorkflowEdge;
 use MatthewWegner\BpmnEngine\Services\GatewayRouter;
@@ -20,40 +22,36 @@ class BpmnInterpreterWorkflow extends Workflow
         $this->inbox->receive($payload);
     }
 
-    public function execute(int $versionId, array $userData)
+    // Add the optional 3rd parameter for branch executions
+    public function execute(int $versionId, array $userData, ?string $startNodeId = null)
     {
         // Note: Querying the DB inside a workflow is safe ONLY IF the data is immutable.
         // Since WorkflowVersions and their nodes never change once published, this is fully deterministic.
         $version = WorkflowVersion::with(['nodes', 'edges'])->findOrFail($versionId);
         
-        // Find the start event
-        $startNode = $version->nodes->where('type', 'startEvent')->first();
-        if (!$startNode) {
-            throw new RuntimeException("No startEvent found.");
+        // If no start node is provided, this is the Master Workflow starting from the beginning
+        if ($startNodeId === null) {
+            // Find the start event
+            $startNode = $version->nodes->where('type', 'startEvent')->first();
+            if (!$startNode) {
+                throw new RuntimeException("No startEvent found.");
+            }
+            $currentNodeId = $startNode->bpmn_element_id;
+        } else {
+            // This is a Child Workflow starting its specific branch
+            $currentNodeId = $startNodeId;
         }
-
-        // Kick off the initial path
-        // yield from is required because executePath contains its own yields
-        return yield from $this->executePath($version, $startNode->bpmn_element_id, $userData);
-    }
-
-    /**
-     * Executes a linear sequence of nodes until it hits a terminal state or a join.
-     */
-    protected function executePath(WorkflowVersion $version, string $startNodeId, array $userData)
-    {
-        $currentNodeId = $startNodeId;
 
         while ($currentNodeId !== null) {
             $node = $version->nodes->where('bpmn_element_id', $currentNodeId)->first();
 
-            // Terminal Node (End Event)
+            // 1. Terminal Condition
             if ($node->type === 'endEvent') {
                 return $userData;
             }
 
             // Service Tasks (Business Logic)
-            if ($node->type === 'serviceTask') {
+            elseif ($node->type === 'serviceTask') {
                 $activityClass = config("bpmn-engine.activities.{$node->implementation}");
                 
                 // Yield hands control back to Laravel Workflow to execute this safely on the queues
@@ -66,7 +64,7 @@ class BpmnInterpreterWorkflow extends Workflow
                 $currentNodeId = $this->getNextSequentialNode($version, $currentNodeId);
             }
 
-            // User Tasks (Human in the loop)
+            // 3. User Tasks (Human in the loop)
             elseif ($node->type === 'userTask') {
                 // Hibernate the workflow until the inbox receives an unread message
                 yield await(fn () => $this->inbox->hasUnread());
@@ -83,32 +81,33 @@ class BpmnInterpreterWorkflow extends Workflow
                 $currentNodeId = $this->getNextSequentialNode($version, $currentNodeId);
             }
 
-            // Exclusive Gateways (Routing)
+            // 4. Exclusive Gateways (Routing)
             elseif ($node->type === 'exclusiveGateway') {
                 $router = new GatewayRouter();
                 $currentNodeId = $router->getNextNodeId($version, $currentNodeId, $userData);
             }
 
-            // Parallel Gateways (The AND Split/Join mechanism)
+            // 5. Parallel Gateways (The AND Split/Join mechanism)
             elseif ($node->type === 'parallelGateway') {
-                
                 $outgoingEdges = $version->edges->where('source_node_id', $currentNodeId);
 
                 // CASE A: It is a SPLIT (Multiple outgoing paths)
                 if ($outgoingEdges->count() > 1) {
-                    $parallelTasks = [];
+                    $parallelStubs = [];
 
-                    // Package every distinct path branch into a concurrent asynchronous promise
                     foreach ($outgoingEdges as $edge) {
-                        $targetId = $edge->target_node_id;
-                        $parallelTasks[] = \Workflow\Workflow::async(fn() => 
-                            yield from $this->executePath($version, $targetId, $userData)
+                        // Spawn a Child Workflow of THIS class, passing the specific branch's starting node ID
+                        $parallelStubs[] = ChildWorkflowStub::make(
+                            self::class,
+                            $versionId,
+                            $userData,
+                            $edge->target_node_id
                         );
                     }
 
-                    // CRITICAL: The yield Workflow::all acts as the sync barrier.
-                    // This pauses the main workflow until every spawned queue job reports back.
-                    $branchResults = yield Workflow::all($parallelTasks);
+                    // The Master Workflow sleeps safely here without generating a serialization error.
+                    // CRITICAL FIX: all() converts the array of stubs into a single PromiseInterface
+                    $branchResults = yield all($parallelStubs);
 
                     // Merge variable mutations from all concurrent paths back into the main payload
                     foreach ($branchResults as $result) {
@@ -121,12 +120,12 @@ class BpmnInterpreterWorkflow extends Workflow
                 }
 
                 // CASE B: It is a JOIN (Single outgoing path, reached by a split branch)
-                // If a sub-path execution hits a join gateway, its local sub-routine loop terminates 
-                // and returns its payload back up to the Workflow::all barrier above.
+                // Reached by a Child Workflow completing its branch. 
+                // We simply break out of the loop and return its payload up to the array yield above!
                 return $userData;
             }
 
-            // Passthrough (StartEvents)
+            // 6. Passthrough (StartEvents)
             else {
                 $currentNodeId = $this->getNextSequentialNode($version, $currentNodeId);
             }
