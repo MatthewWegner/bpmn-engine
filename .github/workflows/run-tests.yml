@@ -13,8 +13,18 @@ jobs:
             fail-fast: false
             matrix:
                 php: ['8.2', '8.3', '8.4']
-                laravel: ['11.0', '12.0', '13.*']
+                laravel: ['11.0', '12.0', '13.0']
                 stability: [prefer-stable]
+                include:
+                  - laravel: '11.0'
+                    testbench: '9.0'
+                  - laravel: '12.0'
+                    testbench: '10.0'
+                  - laravel: '13.0'
+                    testbench: '11.0'
+                exclude:
+                  - php: '8.2'
+                    laravel: '13.0'
 
         name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
 
@@ -31,7 +41,7 @@ jobs:
 
             - name: Install Laravel Orchestral Testbench
               run: |
-                composer require "orchestra/testbench=^${{ matrix.laravel }}" --dev --no-interaction --no-update
+                composer require "orchestra/testbench=^${{ matrix.testbench }}" --dev --no-interaction --no-update
 
             - name: Install dependencies
               run: |
