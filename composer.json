@@ -1,6 +1,7 @@
 {
     "name": "matthewwegner/bpmn-engine",
     "description": "Laravel BPMN Execution Engine",
+    "license": "MIT",
     "type": "library",
     "require": {
         "php": "^8.2",
