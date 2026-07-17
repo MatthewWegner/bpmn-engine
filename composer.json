@@ -8,6 +8,13 @@
         "symfony/expression-language": "^7.0",
         "durable-workflow/workflow": "^1.0"
     },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "MatthewWegner\\BpmnEngine\\BpmnEngineServiceProvider"
+            ]
+        }
+    },
     "autoload": {
         "psr-4": {
             "MatthewWegner\\BpmnEngine\\": "src/"

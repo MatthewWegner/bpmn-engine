@@ -45,7 +45,7 @@ class BpmnInterpreterWorkflow extends Workflow
         while ($currentNodeId !== null) {
             $node = $version->nodes->where('bpmn_element_id', $currentNodeId)->first();
 
-            // 1. Terminal Condition
+            // Terminal Condition
             if ($node->type === 'endEvent') {
                 return $userData;
             }
@@ -64,7 +64,7 @@ class BpmnInterpreterWorkflow extends Workflow
                 $currentNodeId = $this->getNextSequentialNode($version, $currentNodeId);
             }
 
-            // 3. User Tasks (Human in the loop)
+            // User Tasks (Human in the loop)
             elseif ($node->type === 'userTask') {
                 // Hibernate the workflow until the inbox receives an unread message
                 yield await(fn () => $this->inbox->hasUnread());
@@ -81,13 +81,13 @@ class BpmnInterpreterWorkflow extends Workflow
                 $currentNodeId = $this->getNextSequentialNode($version, $currentNodeId);
             }
 
-            // 4. Exclusive Gateways (Routing)
+            // Exclusive Gateways (Routing)
             elseif ($node->type === 'exclusiveGateway') {
                 $router = new GatewayRouter();
                 $currentNodeId = $router->getNextNodeId($version, $currentNodeId, $userData);
             }
 
-            // 5. Parallel Gateways (The AND Split/Join mechanism)
+            // Parallel Gateways (The AND Split/Join mechanism)
             elseif ($node->type === 'parallelGateway') {
                 $outgoingEdges = $version->edges->where('source_node_id', $currentNodeId);
 
@@ -125,7 +125,7 @@ class BpmnInterpreterWorkflow extends Workflow
                 return $userData;
             }
 
-            // 6. Passthrough (StartEvents)
+            // Passthrough (StartEvents)
             else {
                 $currentNodeId = $this->getNextSequentialNode($version, $currentNodeId);
             }

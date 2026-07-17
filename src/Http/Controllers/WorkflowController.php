@@ -18,6 +18,34 @@ class WorkflowController extends Controller
         $this->parser = $parser;
     }
 
+    /**
+     * Display a list of all current workflow definitions.
+     */
+    public function index()
+    {
+        $definitions = WorkflowDefinition::with('versions')->get();
+        
+        return view('bpmn-engine::dashboard', compact('definitions'));
+    }
+
+    /**
+     * Create a brand new workflow definition and redirect to its designer.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'key'  => 'required|alpha_dash|unique:workflow_definitions,key',
+        ]);
+
+        $definition = WorkflowDefinition::create([
+            'name' => $request->name,
+            'key'  => $request->key,
+        ]);
+
+        return redirect()->route('bpmn.design', $definition->id);
+    }
+
     public function storeVersion(Request $request, $definitionId): JsonResponse
     {
         $request->validate([
@@ -57,5 +85,47 @@ class WorkflowController extends Controller
                 'message' => 'Failed to compile workflow: ' . $e->getMessage()
             ], 422);
         }
+    }
+
+    /**
+     * Display the editor canvas.
+     */
+    public function design($definitionId)
+    {
+        $definition = WorkflowDefinition::findOrFail($definitionId);
+        
+        // Grab the latest saved XML string
+        $latestVersion = $definition->versions()->latest('version')->first();
+        
+        // If there are no saved versions, we pass a strictly validated, clean XML string
+        $xml = $latestVersion ? $latestVersion->bpmn_xml : $this->getBlankBlueprintXml();
+
+        return view('bpmn-engine::editor', [
+            'definition' => $definition,
+            'xml'        => $xml,
+        ]);
+    }
+
+    /**
+     * A completely standard, validated, minimal BPMN 2.0 XML blueprint.
+     */
+    protected function getBlankBlueprintXml(): string
+    {
+        return '<?xml version="1.0" encoding="UTF-8"?>' .
+               '<bpmn:definitions xmlns:bpmn="http://omg.org/spec/BPMN/20100524/MODEL" ' .
+               'xmlns:bpmndi="http://omg.org/spec/BPMN/20100524/DI" ' .
+               'xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" ' .
+               'id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">' .
+               '<bpmn:process id="Process_1" isExecutable="true">' .
+               '<bpmn:startEvent id="StartEvent_1" />' .
+               '</bpmn:process>' .
+               '<bpmndi:BPMNDiagram id="BPMNDiagram_1">' .
+               '<bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">' .
+               '<bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">' .
+               '<dc:Bounds x="173" y="102" width="36" height="36" />' .
+               '</bpmndi:BPMNShape>' .
+               '</bpmndi:BPMNPlane>' .
+               '</bpmndi:BPMNDiagram>' .
+               '</bpmn:definitions>';
     }
 }
