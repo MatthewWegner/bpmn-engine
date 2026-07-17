@@ -20,6 +20,12 @@ class BpmnEngineServiceProvider extends ServiceProvider
 
         // Allow the host app to publish the config file
         if ($this->app->runningInConsole()) {
+
+            // Register custom artisan commands
+            $this->commands([
+                \MatthewWegner\BpmnEngine\Console\Commands\MakeActivityCommand::class,
+            ]);
+
             $this->publishes([
                 __DIR__ . '/../config/bpmn-engine.php' => config_path('bpmn-engine.php'),
             ], 'bpmn-engine-config');

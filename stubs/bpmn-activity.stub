@@ -1,0 +1,21 @@
+<?php
+
+namespace {{ namespace }};
+
+use Workflow\Activity;
+
+class {{ class }} extends Activity
+{
+    /**
+     * Execute the business logic for this BPMN service task.
+     *
+     * @param array $userData The current state payload of the workflow.
+     * @return array The mutated data to merge back into the workflow state.
+     */
+    public function execute(array $userData): array
+    {
+        // TODO: Implement your domain logic here
+
+        return [];
+    }
+}
