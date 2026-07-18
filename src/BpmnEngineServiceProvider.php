@@ -29,6 +29,7 @@ class BpmnEngineServiceProvider extends ServiceProvider
             $this->commands([
                 \MatthewWegner\BpmnEngine\Console\Commands\MakeActivityCommand::class,
                 \MatthewWegner\BpmnEngine\Console\Commands\MakeTriggerCommand::class,
+                \MatthewWegner\BpmnEngine\Console\Commands\MakeTemplateCommand::class,
             ]);
 
             $this->publishes([

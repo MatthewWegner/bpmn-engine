@@ -1,0 +1,20 @@
+[
+  {
+    "name": "{{ name }}",
+    "id": "com.saccharine.tasks.{{ id }}",
+    "appliesTo": [
+      "bpmn:ServiceTask"
+    ],
+    "properties": [
+      {
+        "label": "Implementation Class",
+        "type": "Hidden",
+        "value": "{{ activityKey }}",
+        "binding": {
+          "type": "property",
+          "name": "camunda:class"
+        }
+      }
+    ]
+  }
+]

@@ -95,6 +95,7 @@
     <script>
         // Use a safe JSON-decoding assignment to prevent raw quotes or newlines from breaking JS syntax
         const dbXml = {!! $xml ? json_encode($xml) : 'null' !!};
+        const elementTemplates = @json($elementTemplates);
 
         const defaultBlankXml = `<?xml version="1.0" encoding="UTF-8"?>
         <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" 
@@ -118,7 +119,7 @@
         const initialXml = dbXml ? dbXml : defaultBlankXml;
 
         // Initialize our custom bundled modeler
-        window.initBpmnDesigner(initialXml, async (xml) => {
+        window.initBpmnDesigner(initialXml, elementTemplates, async (xml) => {
             const response = await fetch('/api/bpmn/workflows/{{ $definition->id }}/versions', {
                 method: 'POST',
                 headers: {

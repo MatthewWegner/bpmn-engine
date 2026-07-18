@@ -22,8 +22,10 @@
   },
   "homepage": "https://github.com/MatthewWegner/bpmn-engine#readme",
   "dependencies": {
+    "@bpmn-io/element-template-chooser": "^3.0.0",
     "@bpmn-io/properties-panel": "^3.47.0",
     "bpmn-js": "^18.21.0",
+    "bpmn-js-element-templates": "^2.27.0",
     "bpmn-js-properties-panel": "^5.61.0",
     "camunda-bpmn-moddle": "^7.0.1"
   },

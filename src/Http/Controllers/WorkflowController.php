@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use MatthewWegner\BpmnEngine\Models\WorkflowDefinition;
 use MatthewWegner\BpmnEngine\Services\BpmnParserService;
+use Illuminate\Support\Facades\File;
 use Exception;
 
 class WorkflowController extends Controller
@@ -100,9 +101,26 @@ class WorkflowController extends Controller
         // If there are no saved versions, we pass a strictly validated, clean XML string
         $xml = $latestVersion ? $latestVersion->bpmn_xml : $this->getBlankBlueprintXml();
 
+        // Scan the host application for Element Templates
+        $templatesPath = resource_path('bpmn/templates');
+        $elementTemplates = [];
+
+        if (File::isDirectory($templatesPath)) {
+            foreach (File::files($templatesPath) as $file) {
+                if ($file->getExtension() === 'json') {
+                    $content = json_decode(File::get($file), true);
+                    if (is_array($content)) {
+                        // Merge the parsed JSON arrays together
+                        $elementTemplates = array_merge($elementTemplates, $content);
+                    }
+                }
+            }
+        }
+
         return view('bpmn-engine::editor', [
-            'definition' => $definition,
-            'xml'        => $xml,
+            'definition'        => $definition,
+            'xml'               => $xml,
+            'elementTemplates'  => $elementTemplates,
         ]);
     }
 
