@@ -58,6 +58,20 @@
             border-left: 1px solid #e5e7eb;
             overflow-y: auto;
         }
+        div[data-group-id="group-CamundaPlatform__AsynchronousContinuations"],
+        div[data-group-id="group-CamundaPlatform__Form"],
+        div[data-group-id="group-CamundaPlatform__Input"],
+        div[data-group-id="group-CamundaPlatform__Output"],
+        div[data-group-id="group-CamundaPlatform__HistoryCleanup"],
+        div[data-group-id="group-CamundaPlatform__Tasklist"],
+        div[data-group-id="group-CamundaPlatform__CandidateStarter"],
+        div[data-group-id="group-CamundaPlatform__ExternalTask"],
+        div[data-group-id="group-CamundaPlatform__JobExecution"],
+        div[data-group-id="group-CamundaPlatform__ExecutionListener"],
+        div[data-group-id="group-CamundaPlatform__ExtensionProperties"],
+        div[data-group-id="group-CamundaPlatform__FieldInjection"] {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
