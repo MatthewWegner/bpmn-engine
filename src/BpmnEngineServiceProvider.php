@@ -3,6 +3,8 @@
 namespace MatthewWegner\BpmnEngine;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Event;
+use MatthewWegner\BpmnEngine\Listeners\WorkflowTriggerListener;
 
 class BpmnEngineServiceProvider extends ServiceProvider
 {
@@ -18,12 +20,15 @@ class BpmnEngineServiceProvider extends ServiceProvider
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'bpmn-engine');
 
+        // Listen to all events to check for start event triggers
+        Event::listen('*', [WorkflowTriggerListener::class, 'handle']);
+
         // Allow the host app to publish the config file
         if ($this->app->runningInConsole()) {
-
             // Register custom artisan commands
             $this->commands([
                 \MatthewWegner\BpmnEngine\Console\Commands\MakeActivityCommand::class,
+                \MatthewWegner\BpmnEngine\Console\Commands\MakeTriggerCommand::class,
             ]);
 
             $this->publishes([

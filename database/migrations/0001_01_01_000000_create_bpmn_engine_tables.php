@@ -40,7 +40,6 @@ return new class extends Migration
             });
         }
 
-        
         if (!Schema::hasTable('workflow_edges')) {
             Schema::create('workflow_edges', function (Blueprint $table) {
                 $table->id();
@@ -52,6 +51,19 @@ return new class extends Migration
                 $table->timestamps();
             });
         }
+
+        if (!Schema::hasTable('workflow_triggers_log')) {
+            Schema::create('workflow_triggers_log', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('workflow_version_id')->constrained()->cascadeOnDelete();
+                $table->string('business_key');
+                $table->string('durable_workflow_id');
+                $table->timestamps();
+
+                // Prevent the same version from running the same business key twice
+                $table->unique(['workflow_version_id', 'business_key']);
+            });
+        }
     }
 
     public function down()
@@ -60,5 +72,6 @@ return new class extends Migration
         Schema::dropIfExists('workflow_nodes');
         Schema::dropIfExists('workflow_versions');
         Schema::dropIfExists('workflow_definitions');
+        Schema::dropIfExists('workflow_triggers_log');
     }
 };

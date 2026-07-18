@@ -1,0 +1,37 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Foundation\Events\Dispatchable;
+use MatthewWegner\BpmnEngine\Contracts\BpmnTriggerableEvent;
+
+class {{ class }} implements BpmnTriggerableEvent
+{
+    use Dispatchable;
+
+    /**
+     * Create a new event instance.
+     */
+    public function __construct(
+        // public int $domainObjectId,
+    ) {}
+
+    /**
+     * Define the unique lock key to prevent duplicate workflow executions.
+     */
+    public function getBusinessKey(): string
+    {
+        // Example: return 'domain_object_' . $this->domainObjectId;
+        return 'unique_key_here'; 
+    }
+
+    /**
+     * Define the initial data injected into the BPMN engine payload.
+     */
+    public function getWorkflowPayload(): array
+    {
+        return [
+            // 'domain_id' => $this->domainObjectId,
+        ];
+    }
+}
