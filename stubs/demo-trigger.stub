@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Events;
+
+use Illuminate\Foundation\Events\Dispatchable;
+use MatthewWegner\BpmnEngine\Contracts\BpmnTriggerableEvent;
+
+class DemoOrderPlaced implements BpmnTriggerableEvent
+{
+    use Dispatchable;
+
+    public function __construct(
+        public string $orderId,
+        public float $amount,
+        public string $customerName
+    ) {}
+
+    public function getBusinessKey(): string
+    {
+        return 'demo_order_' . $this->orderId;
+    }
+
+    public function getWorkflowPayload(): array
+    {
+        return [
+            'order_id'      => $this->orderId,
+            'amount'        => $this->amount,
+            'customer_name' => $this->customerName,
+            'status'        => 'pending_processing'
+        ];
+    }
+}
