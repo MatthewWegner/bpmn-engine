@@ -44,7 +44,10 @@ class WorkflowTriggerListener
         $businessKey = $eventInstance->getBusinessKey();
         $workflowPayload = $eventInstance->getWorkflowPayload();
 
-        foreach ($startNodes as $node) {
+        // Pluck only unique version IDs to prevent duplicate launches on messy diagrams
+        $uniqueVersionIds = $startNodes->pluck('workflow_version_id')->unique();
+
+        foreach ($uniqueVersionIds as $node) {
             $versionId = $node->workflow_version_id;
 
             // Enforce Idempotency using a safe database transaction
