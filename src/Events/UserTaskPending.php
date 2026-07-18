@@ -12,6 +12,6 @@ class UserTaskPending
     public function __construct(
         public string $workflowId,
         public ?string $taskName,
-        public string $userData
+        public array $userData
     ) {}
 }
