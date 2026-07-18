@@ -35,7 +35,7 @@ class BpmnParserService
             throw new Exception('Invalid BPMN file: <bpmn:process> element not found.');
         }
 
-        DB::transaction(function () use ($version, $process) {
+        DB::transaction(function () use ($version, $process, $messageMap) {
             // Clear existing elements if re-parsing
             $version->nodes()->delete();
             $version->edges()->delete();

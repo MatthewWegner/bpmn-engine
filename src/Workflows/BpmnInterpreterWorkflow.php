@@ -66,6 +66,13 @@ class BpmnInterpreterWorkflow extends Workflow
 
             // User Tasks (Human in the loop)
             elseif ($node->type === 'userTask') {
+                // Announce to the host application that a human is needed
+                event(new \MatthewWegner\BpmnEngine\Events\UserTaskPending(
+                    $this->id(), // The Durable Workflow ID
+                    $node->name,
+                    $userData
+                ));
+
                 // Hibernate the workflow until the inbox receives an unread message
                 yield await(fn () => $this->inbox->hasUnread());
 
