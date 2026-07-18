@@ -17,6 +17,18 @@ class BpmnParserService
         $xml->registerXPathNamespace('bpmn', 'http://omg.org/spec/BPMN/20100524/MODEL');
         $xml->registerXPathNamespace('camunda', 'http://camunda.org/schema/1.0/bpmn');
 
+        // Build a dictionary of global BPMN Messages
+        $messageMap = [];
+        $messages = $xml->xpath('//bpmn:message');
+
+        if ($messages !== false) {
+            foreach ($messages as $message) {
+                $id = (string) $message['id'];
+                $name = (string) $message['name'];
+                $messageMap[$id] = $name;
+            }
+        }
+
         $process = $xml->xpath('//bpmn:process')[0] ?? null;
 
         if (!$process) {
@@ -46,6 +58,19 @@ class BpmnParserService
                     // Extract the implementation key from camunda:class
                     $camundaAttrs = $element->attributes('http://camunda.org/schema/1.0/bpmn');
                     $implementation = (string) ($camundaAttrs['class'] ?? null);
+
+                    // Intercept Message Start Events and resolve their alias
+                    if ($type === 'startEvent') {
+                        $msgDef = $element->xpath('.//bpmn:messageEventDefinition');
+                        
+                        if (!empty($msgDef)) {
+                            // Extract the reference ID (e.g., 'Message_0x8b3a')
+                            $messageRef = (string) $msgDef[0]['messageRef'];
+                            
+                            // Map it back to the actual string alias (e.g., 'custody_log_created')
+                            $implementation = $messageMap[$messageRef] ?? $implementation;
+                        }
+                    }
 
                     $version->nodes()->create([
                         'bpmn_element_id' => $bpmnId,
