@@ -2,6 +2,7 @@
     "name": "matthewwegner/bpmn-engine",
     "description": "Laravel BPMN Execution Engine",
     "license": "MIT",
+    "keywords": ["laravel", "bpmn", "workflow", "camunda", "orchestration"],
     "type": "library",
     "require": {
         "php": "^8.3",
