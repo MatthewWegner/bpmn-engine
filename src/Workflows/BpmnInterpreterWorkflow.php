@@ -68,7 +68,7 @@ class BpmnInterpreterWorkflow extends Workflow
             elseif ($node->type === 'userTask') {
                 // Announce to the host application that a human is needed
                 event(new \MatthewWegner\BpmnEngine\Events\UserTaskPending(
-                    $this->id(), // The Durable Workflow ID
+                    $this->uniqueId(), // The Durable Workflow ID
                     $node->name,
                     $userData
                 ));
