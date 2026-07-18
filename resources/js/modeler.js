@@ -7,6 +7,10 @@ import {
 } from 'bpmn-js-properties-panel';
 import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda.json';
 
+// Custom menu overrides
+import { CustomPaletteModule } from './CustomPaletteProvider.js';
+import { CustomContextPadModule } from './CustomContextPadProvider.js';
+
 // Expose a globally accessible initialization function
 window.initBpmnDesigner = function(initialXml, saveCallback) {
     const modeler = new BpmnModeler({
@@ -17,7 +21,9 @@ window.initBpmnDesigner = function(initialXml, saveCallback) {
         additionalModules: [
             BpmnPropertiesPanelModule,
             BpmnPropertiesProviderModule,
-            CamundaPlatformPropertiesProviderModule
+            CamundaPlatformPropertiesProviderModule,
+            CustomPaletteModule, // Inject custom palette
+            CustomContextPadModule // Inject the context pad filter
         ],
         moddleExtensions: {
             camunda: camundaModdleDescriptor
