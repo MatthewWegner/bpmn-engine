@@ -4,6 +4,8 @@ A lightweight, native PHP workflow orchestrator and visual designer for Laravel.
 
 It bridges the gap between visual business diagrams and real-world execution by combining **bpmn-js** (for modeling) and **durable-workflow** (for resilient, suspendable background execution).
 
+***Status: Proof of Concept / Alpha. This package is actively being developed and the core execution engine works, but it is not yet recommended for production environments.***
+
 ## **Key Features**
 
 * **No Heavy External Infrastructure:** Runs entirely on your existing Laravel queue system (database, Redis, SQS, etc.).
