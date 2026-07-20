@@ -97,8 +97,8 @@
         const dbXml = {!! $xml ? json_encode($xml) : 'null' !!};
         const elementTemplates = @json($elementTemplates);
 
-        const defaultBlankXml = `<?xml version="1.0" encoding="UTF-8"?>
-        <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" 
+        const defaultBlankXml = '<' + '?xml version="1.0" encoding="UTF-8"?>\n' +
+        `<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" 
                           xmlns:bpmndi="http://omg.org/spec/BPMN/20100524/DI" 
                           xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" 
                           xmlns:di="http://www.omg.org/spec/DD/20100524/DI" 
