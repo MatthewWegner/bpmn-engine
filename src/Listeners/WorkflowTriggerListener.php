@@ -61,9 +61,17 @@ class WorkflowTriggerListener
                     return; // Skip: This process already triggered for this specific domain object
                 }
 
+                // Create an Instance using Eloquent so we can capture the new ID
+                $instance = WorkflowInstance::create([
+                    'workflow_version_id' => $versionId,
+                    'status'              => WorkflowInstanceStatus::RUNNING,
+                    'durable_workflow_id' => $workflow->id(),
+                ]);
+
                 // Launch the Durable Workflow!
+                // Parameters: versionId, userData, startNodeId (null for master), instanceId
                 $workflow = WorkflowStub::make(BpmnInterpreterWorkflow::class);
-                $workflow->start($versionId, $workflowPayload);
+                $workflow->start($versionId, $workflowPayload, null, $instance->id);
 
                 // Log the trigger to prevent future duplicates
                 DB::table('workflow_triggers_log')->insert([

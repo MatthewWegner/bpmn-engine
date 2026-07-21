@@ -81,18 +81,26 @@ class BpmnInterpreterWorkflow extends Workflow
                 continue; 
             }
 
-            // SideEffect ensures this database query only runs exactly once per step, never on replay
+            // Token tracker: SideEffect ensures this database query only runs exactly once per step, never on replay
             if ($instanceId !== null) {
                 yield Workflow::sideEffect(function () use ($instanceId, $currentNodeId) {
-                    \MatthewWegner\BpmnEngine\Models\WorkflowInstance::where('id', $instanceId)
-                        ->update(['current_node_id' => $currentNodeId]);
+                    WorkflowToken::updateOrCreate(
+                        [
+                            'workflow_instance_id' => $instanceId,
+                            'durable_workflow_id'  => $this->uniqueId(),
+                        ],
+                        [
+                            'bpmn_element_id' => $currentNodeId,
+                        ]
+                    );
                 });
             }
 
             $node = $version->nodes->where('bpmn_element_id', $currentNodeId)->first();
 
-            // Terminal Condition
+            // Terminal Condition (End of Process)
             if ($node->type === 'endEvent') {
+                $this->cleanupToken($instanceId);
                 return $userData;
             }
 
@@ -160,7 +168,8 @@ class BpmnInterpreterWorkflow extends Workflow
                             self::class,
                             $versionId,
                             $userData,
-                            $edge->target_node_id
+                            $edge->target_node_id,
+                            $instanceId // Pass the parent instance down
                         );
                     }
 
@@ -179,7 +188,10 @@ class BpmnInterpreterWorkflow extends Workflow
                 }
 
                 // CASE B: It is a JOIN (Single outgoing path, reached by a split branch)
-                // Reached by a Child Workflow completing its branch. 
+
+                // Child branch reached a join. Clean up its specific token and return to parent.
+                $this->cleanupToken($instanceId);
+
                 // We simply break out of the loop and return its payload up to the array yield above!
                 return $userData;
             }
@@ -190,6 +202,9 @@ class BpmnInterpreterWorkflow extends Workflow
             }
         }
 
+        // Failsafe cleanup if the loop breaks
+        $this->cleanupToken($instanceId);
+        
         return $userData;
     }
 
@@ -224,5 +239,17 @@ class BpmnInterpreterWorkflow extends Workflow
         }
 
         return null;
+    }
+    
+    /**
+     * Removes the active token from the database when a thread terminates.
+     */
+    protected function cleanupToken(?int $instanceId): void
+    {
+        if ($instanceId !== null) {
+            // Because side effects cannot be yielded from a void return easily inside the execution structure,
+            // we can trigger this directly in a blocking manner since it's the final action of the thread.
+            WorkflowToken::where('durable_workflow_id', $this->uniqueId())->delete();
+        }
     }
 }

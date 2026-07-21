@@ -12,9 +12,8 @@ return new class extends Migration
             Schema::create('workflow_instances', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('workflow_version_id')->constrained()->cascadeOnDelete();
-                $table->string('status'); // running, suspended, halted, completed, failed
-                $table->string('durable_workflow_id');
-                $table->string('current_node_id');
+                $table->enum('status', ['running', 'suspended', 'halted', 'completed', 'failed'])->default('running');
+                $table->string('durable_workflow_id')->index(); 
                 $table->timestamps();
             });
         }
