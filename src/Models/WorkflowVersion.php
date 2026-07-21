@@ -3,10 +3,17 @@
 namespace MatthewWegner\BpmnEngine\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WorkflowVersion extends Model
 {
     protected $guarded = [];
+    
+    // Inverse relationship to get the name/key
+    public function definition(): BelongsTo
+    {
+        return $this->belongsTo(WorkflowDefinition::class, 'workflow_definition_id');
+    }
 
     public function nodes()
     {
