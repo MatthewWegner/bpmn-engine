@@ -15,11 +15,34 @@ use RuntimeException;
 
 class BpmnInterpreterWorkflow extends Workflow
 {
+    // Internal state trackers for manual interventions
+    private bool $isSuspended = false;
+    private bool $isHalted = false;
+
     // Define a generic signal receiver that pipes data into the durable Inbox
     #[SignalMethod]
     public function submitUserTask(array $payload)
     {
         $this->inbox->receive($payload);
+    }
+
+    // Workflow intervention signals
+    #[SignalMethod]
+    public function suspendWorkflow()
+    {
+        $this->isSuspended = true;
+    }
+
+    #[SignalMethod]
+    public function resumeWorkflow()
+    {
+        $this->isSuspended = false;
+    }
+
+    #[SignalMethod]
+    public function haltWorkflow()
+    {
+        $this->isHalted = true;
     }
 
     // Add the optional 3rd parameter for branch executions
@@ -43,6 +66,21 @@ class BpmnInterpreterWorkflow extends Workflow
         }
 
         while ($currentNodeId !== null) {
+            // HALT CHECK: Immediately break the loop and terminate the process
+            if ($this->isHalted) {
+                // You can optionally inject a 'halted_at' flag into the payload
+                $userData['_system_status'] = 'halted';
+                break; 
+            }
+
+            // SUSPENSION CHECK: Hibernate safely until resumed (or halted while sleeping)
+            if ($this->isSuspended) {
+                yield await(fn () => !$this->isSuspended || $this->isHalted);
+                
+                // Continue forces the loop to re-evaluate the Halt check immediately upon waking up
+                continue; 
+            }
+
             $node = $version->nodes->where('bpmn_element_id', $currentNodeId)->first();
 
             // Terminal Condition
@@ -74,7 +112,13 @@ class BpmnInterpreterWorkflow extends Workflow
                 ));
 
                 // Hibernate the workflow until the inbox receives an unread message
-                yield await(fn () => $this->inbox->hasUnread());
+                // We also need to allow halting/suspending while waiting for a user!
+                yield await(fn () => $this->inbox->hasUnread() || $this->isSuspended || $this->isHalted);
+
+                // If the workflow woke up due to a manual intervention, bypass processing the inbox
+                if ($this->isSuspended || $this->isHalted) {
+                    continue; 
+                }
 
                 // Pop the message out of the inbox securely
                 $signalPayload = $this->inbox->nextUnread();
