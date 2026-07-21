@@ -7,6 +7,8 @@ use MatthewWegner\BpmnEngine\Contracts\BpmnTriggerableEvent;
 use MatthewWegner\BpmnEngine\Models\WorkflowNode;
 use Workflow\WorkflowStub;
 use MatthewWegner\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
+use MatthewWegner\BpmnEngine\Models\WorkflowInstance;
+use MatthewWegner\BpmnEngine\Enums\WorkflowInstanceStatus;
 
 class WorkflowTriggerListener
 {
@@ -47,9 +49,7 @@ class WorkflowTriggerListener
         // Pluck only unique version IDs to prevent duplicate launches on messy diagrams
         $uniqueVersionIds = $startNodes->pluck('workflow_version_id')->unique();
 
-        foreach ($uniqueVersionIds as $node) {
-            $versionId = $node->workflow_version_id;
-
+        foreach ($uniqueVersionIds as $versionId) {
             // Enforce Idempotency using a safe database transaction
             DB::transaction(function () use ($versionId, $businessKey, $workflowPayload) {
                 $alreadyRan = DB::table('workflow_triggers_log')
@@ -60,6 +60,9 @@ class WorkflowTriggerListener
                 if ($alreadyRan) {
                     return; // Skip: This process already triggered for this specific domain object
                 }
+                
+                // Launch the Durable Workflow!
+                $workflow = WorkflowStub::make(BpmnInterpreterWorkflow::class);
 
                 // Create an Instance using Eloquent so we can capture the new ID
                 $instance = WorkflowInstance::create([
@@ -68,9 +71,7 @@ class WorkflowTriggerListener
                     'durable_workflow_id' => $workflow->id(),
                 ]);
 
-                // Launch the Durable Workflow!
                 // Parameters: versionId, userData, startNodeId (null for master), instanceId
-                $workflow = WorkflowStub::make(BpmnInterpreterWorkflow::class);
                 $workflow->start($versionId, $workflowPayload, null, $instance->id);
 
                 // Log the trigger to prevent future duplicates
