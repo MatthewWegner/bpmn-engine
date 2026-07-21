@@ -46,12 +46,12 @@ class BpmnInterpreterWorkflow extends Workflow
     }
 
     // Add the optional 3rd parameter for branch executions
-    public function execute(int $versionId, array $userData, ?string $startNodeId = null)
+    public function execute(int $versionId, array $userData, ?string $startNodeId = null, ?int $instanceId = null)
     {
         // Note: Querying the DB inside a workflow is safe ONLY IF the data is immutable.
         // Since WorkflowVersions and their nodes never change once published, this is fully deterministic.
         $version = WorkflowVersion::with(['nodes', 'edges'])->findOrFail($versionId);
-        
+
         // If no start node is provided, this is the Master Workflow starting from the beginning
         if ($startNodeId === null) {
             // Find the start event
@@ -79,6 +79,14 @@ class BpmnInterpreterWorkflow extends Workflow
                 
                 // Continue forces the loop to re-evaluate the Halt check immediately upon waking up
                 continue; 
+            }
+
+            // SideEffect ensures this database query only runs exactly once per step, never on replay
+            if ($instanceId !== null) {
+                yield Workflow::sideEffect(function () use ($instanceId, $currentNodeId) {
+                    \MatthewWegner\BpmnEngine\Models\WorkflowInstance::where('id', $instanceId)
+                        ->update(['current_node_id' => $currentNodeId]);
+                });
             }
 
             $node = $version->nodes->where('bpmn_element_id', $currentNodeId)->first();
