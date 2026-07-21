@@ -4,6 +4,7 @@ namespace MatthewWegner\BpmnEngine\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WorkflowInstance extends Model
 {
@@ -20,8 +21,8 @@ class WorkflowInstance extends Model
     {
         return $this->belongsTo(WorkflowVersion::class, 'workflow_version_id');
     }
-
-    public function tokens()
+    
+    public function tokens(): HasMany
     {
         return $this->hasMany(WorkflowToken::class, 'workflow_instance_id');
     }

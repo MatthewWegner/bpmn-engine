@@ -5,6 +5,7 @@ namespace MatthewWegner\BpmnEngine\Http\Controllers;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use MatthewWegner\BpmnEngine\Models\WorkflowInstance;
+use MatthewWegner\BpmnEngine\Enums\WorkflowInstanceStatus;
 use Workflow\WorkflowStub;
 
 class WorkflowInstanceController extends Controller
@@ -14,8 +15,9 @@ class WorkflowInstanceController extends Controller
      */
     public function index()
     {
-        $instances = WorkflowInstance::with('version.definition')
-            ->orderBy('created_at', 'desc')
+        // Eager load the version, definition, and active tokens
+        $instances = WorkflowInstance::with(['version.definition', 'tokens'])
+            ->orderBy('id', 'desc')
             ->paginate(20);
 
         // We will build a 'bpmn-engine::instances.index' view to display this table
@@ -29,12 +31,15 @@ class WorkflowInstanceController extends Controller
     {
         $instance = WorkflowInstance::findOrFail($id);
 
-        if ($instance->status !== 'running') {
+        if ($instance->status !== WorkflowInstanceStatus::RUNNING) {
             return back()->with('error', 'Only running workflows can be suspended.');
         }
 
         // Update the relational state. The engine loop will read this on its next cycle.
-        $instance->update(['status' => 'suspended']);
+        $instance->update(['status' => WorkflowInstanceStatus::SUSPENDED]);
+        
+        $workflow = WorkflowStub::load($instance->durable_workflow_id);
+        $workflow->suspendWorkflow();
 
         return back()->with('success', "Workflow instance [{$id}] suspended.");
     }
@@ -46,16 +51,16 @@ class WorkflowInstanceController extends Controller
     {
         $instance = WorkflowInstance::findOrFail($id);
 
-        if ($instance->status !== 'suspended') {
+        if ($instance->status !== WorkflowInstanceStatus::SUSPENDED) {
             return back()->with('error', 'Only suspended workflows can be resumed.');
         }
 
-        // 1. Update the database state
-        $instance->update(['status' => 'running']);
+        // Update the database state
+        $instance->update(['status' => WorkflowInstanceStatus::RUNNING]);
 
-        // 2. Load the durable coroutine and fire a signal to wake it up
+        // Load the durable coroutine and fire a signal to wake it up
         $workflow = WorkflowStub::load($instance->durable_workflow_id);
-        $workflow->signal('workflow_resumed', ['action' => 'resume']);
+        $workflow->resumeWorkflow();
 
         return back()->with('success', "Workflow instance [{$id}] resumed.");
     }
@@ -67,15 +72,18 @@ class WorkflowInstanceController extends Controller
     {
         $instance = WorkflowInstance::findOrFail($id);
 
-        if (in_array($instance->status, ['completed', 'failed', 'halted'])) {
+        if (
+            in_array($instance->status,
+            [WorkflowInstanceStatus::COMPLETED, WorkflowInstanceStatus::FAILED, WorkflowInstanceStatus::HALTED])
+        ) {
             return back()->with('error', 'This workflow is already in a terminal state.');
         }
-
-        $instance->update(['status' => 'halted']);
+        
+        $instance->update(['status' => WorkflowInstanceStatus::HALTED]);
 
         // Signal the engine to break its execution loop and clean up
         $workflow = WorkflowStub::load($instance->durable_workflow_id);
-        $workflow->signal('workflow_halted', ['action' => 'halt']);
+        $workflow->haltWorkflow();
 
         return back()->with('success', "Workflow instance [{$id}] permanently halted.");
     }

@@ -10,6 +10,7 @@ use function Workflow\await;
 use function Workflow\all;
 use MatthewWegner\BpmnEngine\Models\WorkflowVersion;
 use MatthewWegner\BpmnEngine\Models\WorkflowEdge;
+use MatthewWegner\BpmnEngine\Models\WorkflowToken;
 use MatthewWegner\BpmnEngine\Services\GatewayRouter;
 use RuntimeException;
 
