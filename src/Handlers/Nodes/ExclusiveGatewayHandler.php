@@ -22,6 +22,7 @@ class ExclusiveGatewayHandler implements BpmnNodeHandlerInterface
         $router = new GatewayRouter();
         $nextNodeId = $router->getNextNodeId($version, $node->bpmn_element_id, $userData);
 
+        yield from []; // Satisfies the Generator return type
         return [$nextNodeId, $userData];
     }
 }

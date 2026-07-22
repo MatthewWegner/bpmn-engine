@@ -17,6 +17,8 @@ class EndEventHandler implements BpmnNodeHandlerInterface
         ?int $instanceId
     ): \Generator
     {
+        yield from []; // Satisfies the Generator return type
+        
         // Terminal node; there is no next node.
         return [null, $userData];
     }
