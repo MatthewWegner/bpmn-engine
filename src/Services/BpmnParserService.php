@@ -44,7 +44,8 @@ class BpmnParserService
             $nodeTypes = [
                 'startEvent', 'endEvent', 
                 'serviceTask', 'userTask', 
-                'exclusiveGateway', 'parallelGateway'
+                'exclusiveGateway', 'parallelGateway',
+                'boundaryEvent'
             ];
 
             foreach ($nodeTypes as $type) {
@@ -54,13 +55,31 @@ class BpmnParserService
                     $attributes = $element->attributes();
                     $bpmnId = (string) $attributes['id'];
                     $name = (string) ($attributes['name'] ?? '');
+                    $attachedToRef = null;
+                    $eventDefType = null;
 
                     // Extract the implementation key from camunda:class
                     $camundaAttrs = $element->attributes('http://camunda.org/schema/1.0/bpmn');
                     $implementation = (string) ($camundaAttrs['class'] ?? null);
 
+                    if ($type === 'boundaryEvent') {
+                        $attachedToRef = (string) $attributes['attachedToRef'];
+                        
+                        // Dynamically determine the sub-type by looking at child nodes
+                        if (!empty($element->xpath('.//bpmn:errorEventDefinition'))) {
+                            $eventDefType = 'error';
+                            // In Camunda, error codes are often stored here. We can map this to $implementation for now.
+                            $errorDef = $element->xpath('.//bpmn:errorEventDefinition')[0];
+                            $implementation = (string) $errorDef['errorRef'] ?? 'general_error';
+                        } elseif (!empty($element->xpath('.//bpmn:timerEventDefinition'))) {
+                            $eventDefType = 'timer';
+                        } elseif (!empty($element->xpath('.//bpmn:messageEventDefinition'))) {
+                            $eventDefType = 'message';
+                        }
+                    }
+
                     // Intercept Message Start Events and resolve their alias
-                    if ($type === 'startEvent') {
+                    else if ($type === 'startEvent') {
                         $msgDef = $element->xpath('.//bpmn:messageEventDefinition');
                         
                         if (!empty($msgDef)) {
@@ -77,6 +96,8 @@ class BpmnParserService
                         'type'            => $type,
                         'name'            => $name ?: null,
                         'implementation'  => $implementation,
+                        'attached_to_element_id' => $attachedToRef,
+                        'event_definition_type'  => $eventDefType,
                     ]);
                 }
             }

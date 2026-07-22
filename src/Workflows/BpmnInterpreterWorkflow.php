@@ -109,14 +109,36 @@ class BpmnInterpreterWorkflow extends Workflow
             elseif ($node->type === 'serviceTask') {
                 $activityClass = config("bpmn-engine.activities.{$node->implementation}");
                 
-                // Yield hands control back to Laravel Workflow to execute this safely on the queues
-                $activityResult = yield ActivityStub::make($activityClass, $userData);
-                
-                // Merge the results back into the global state
-                $userData = array_merge($userData, $activityResult);
+                // Look for any error boundary events attached to this specific task
+                $errorBoundaryNode = $version->nodes
+                    ->where('type', 'boundaryEvent')
+                    ->where('event_definition_type', 'error')
+                    ->where('attached_to_element_id', $currentNodeId)
+                    ->first();
 
-                // Advance to the next sequential node
-                $currentNodeId = $this->getNextSequentialNode($version, $currentNodeId);
+                try {
+                    // Attempt the standard execution
+
+                    // Yield hands control back to Laravel Workflow to execute this safely on the queues
+                    $activityResult = yield ActivityStub::make($activityClass, $userData);
+
+                    // Merge the results back into the global state
+                    $userData = array_merge($userData, $activityResult);
+
+                    // Advance to the next sequential node
+                    $currentNodeId = $this->getNextSequentialNode($version, $currentNodeId);
+                    
+                } catch (\Throwable $e) {
+                    // If it fails, check if we have a defined escape route
+                    if ($errorBoundaryNode) {
+                        // We caught the anticipated error! Route the token to the boundary event's outgoing edge.
+                        $userData['_error_caught'] = $e->getMessage();
+                        $currentNodeId = $this->getNextSequentialNode($version, $errorBoundaryNode->bpmn_element_id);
+                    } else {
+                        // No boundary event defined. Let the Durable Workflow handle the standard failure/retry loop.
+                        throw $e;
+                    }
+                }
             }
 
             // User Tasks (Human in the loop)
