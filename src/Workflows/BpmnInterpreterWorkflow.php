@@ -58,10 +58,15 @@ class BpmnInterpreterWorkflow extends Workflow
     }
 
     // Add the optional 3rd parameter for branch executions
-    public function execute(int $versionId, array $userData, ?string $startNodeId = null, ?int $instanceId = null)
-    {
+    public function execute(
+        int $versionId,
+        array $userData,
+        ?string $startNodeId = null,
+        ?int $instanceId = null
+    ) {
         // Note: Querying the DB inside a workflow is safe ONLY IF the data is immutable.
-        // Since WorkflowVersions and their nodes never change once published, this is fully deterministic.
+        // Since WorkflowVersions and their nodes never change once published,
+        // this is fully deterministic.
         $version = WorkflowVersion::with(['nodes', 'edges'])->findOrFail($versionId);
 
         // If no start node is provided, this is the Master Workflow starting from the beginning
@@ -141,7 +146,7 @@ class BpmnInterpreterWorkflow extends Workflow
     /**
      * Helper to find the immediate next node in a straight line (non-gateway paths)
      */
-    protected function getNextSequentialNode(WorkflowVersion $version, string $currentNodeId): ?string
+    public function getNextSequentialNode(WorkflowVersion $version, string $currentNodeId): ?string
     {
         $edge = $version->edges->where('source_node_id', $currentNodeId)->first();
         return $edge ? $edge->target_node_id : null;
