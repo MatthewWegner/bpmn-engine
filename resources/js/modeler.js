@@ -1,5 +1,5 @@
-// resources/js/modeler.js
 import BpmnModeler from 'bpmn-js/lib/Modeler';
+import BpmnNavigatedViewer from 'bpmn-js/lib/NavigatedViewer'; // NEW: Import the viewer
 
 import '@bpmn-io/element-template-chooser/dist/element-template-chooser.css';
 import ElementTemplateChooserModule from '@bpmn-io/element-template-chooser';
@@ -89,4 +89,40 @@ window.initBpmnDesigner = function(initialXml, elementTemplates, saveCallback) {
             // alert('An error occurred while exporting the XML.');
         }
     });
+};
+
+// Live viewer
+window.initBpmnViewer = function(initialXml, containerSelector) {
+    const viewer = new BpmnNavigatedViewer({
+        container: containerSelector
+    });
+
+    async function render() {
+        try {
+            await viewer.importXML(initialXml);
+            viewer.get('canvas').zoom('fit-viewport');
+        } catch (err) {
+            console.error('Error rendering tracking diagram:', err);
+        }
+    }
+
+    render();
+
+    // Return a control object so the host app can easily update markers
+    return {
+        viewer: viewer,
+        updateTokens: function(activeNodeIds, previousNodeIds = []) {
+            const canvas = viewer.get('canvas');
+            
+            // Clean up old markers
+            previousNodeIds.forEach(nodeId => {
+                try { canvas.removeMarker(nodeId, 'bpmn-active-token'); } catch (e) {}
+            });
+
+            // Apply new markers
+            activeNodeIds.forEach(nodeId => {
+                try { canvas.addMarker(nodeId, 'bpmn-active-token'); } catch (e) {}
+            });
+        }
+    };
 };

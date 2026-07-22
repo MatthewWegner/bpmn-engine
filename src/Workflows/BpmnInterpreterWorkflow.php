@@ -3,6 +3,7 @@
 namespace MatthewWegner\BpmnEngine\Workflows;
 
 use Workflow\Workflow;
+use Workflow\WorkflowStub;
 use Workflow\ActivityStub;
 use Workflow\ChildWorkflowStub;
 use Workflow\SignalMethod;
@@ -100,7 +101,7 @@ class BpmnInterpreterWorkflow extends Workflow
 
             // Token tracker: SideEffect ensures this database query only runs exactly once per step, never on replay
             if ($instanceId !== null) {
-                yield Workflow::sideEffect(function () use ($instanceId, $currentNodeId) {
+                yield WorkflowStub::sideEffect(function () use ($instanceId, $currentNodeId) {
                     WorkflowToken::updateOrCreate(
                         [
                             'workflow_instance_id' => $instanceId,
