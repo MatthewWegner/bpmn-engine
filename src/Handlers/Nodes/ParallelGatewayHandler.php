@@ -48,11 +48,10 @@ class ParallelGatewayHandler implements BpmnNodeHandlerInterface
             }
 
             // Once merged, find the post-join node to advance the main process pointer.
-            $nextNodeId = $this->findPostJoinNode($version, $node->bpmn_element_id);
+            $nextNodeId = $this->findPostJoinNode($workflow, $version, $node->bpmn_element_id);
             return [$nextNodeId, $userData];
         }
 
-        
         // CASE B: It is a JOIN (Single outgoing path, reached by a split branch)
         return [null, $userData];
     }
@@ -60,7 +59,11 @@ class ParallelGatewayHandler implements BpmnNodeHandlerInterface
     /**
      * Finds the node immediately following the converging Parallel Join Gateway.
      */
-    private function findPostJoinNode(WorkflowVersion $version, string $splitGatewayId): ?string
+    private function findPostJoinNode(
+        BpmnInterpreterWorkflow $workflow,
+        WorkflowVersion $version,
+        string $splitGatewayId
+    ): ?string
     {
         // For standard BPMN layouts, we trace an arbitrary branch from the split down to the join.
         // Once we find the join gateway, we grab its single outgoing edge.
