@@ -4,7 +4,7 @@ A lightweight, native PHP workflow orchestrator and visual designer for Laravel.
 
 It bridges the gap between visual business diagrams and real-world execution by combining **bpmn-js** (for modeling) and **durable-workflow** (for resilient, suspendable background execution).
 
-***Status: Proof of Concept / Alpha. This package is actively being developed and the core execution engine works, but it is not yet recommended for production environments.***
+***Status: v0.2.0-alpha. This package is actively being developed. The core execution engine, token tracking, and manual intervention layers are operational, but it is not yet recommended for production environments.***
 
 ## **Key Features**
 
@@ -15,6 +15,9 @@ It bridges the gap between visual business diagrams and real-world execution by 
 * **Durable Parallel Execution:** True execution of parallel branches (AND splits/joins) utilizing PHP child-workflow fibers to bypass generator serialization constraints.
 * **Human-in-the-Loop (userTask):** Pause execution indefinitely to wait for external human input (signals), then resume automatically.
 * **Service Orchestration (serviceTask):** Map visual canvas elements directly to native Laravel Activity classes.
+* **State Projection & Live Tracking:** Separates background coroutines from UI tracking using isolated relational workflow_tokens, completely eliminating parallel race conditions.
+* **Manual Interventions:** Built-in CLI and Web UI dashboard to safely suspend, resume, and halt running workflows.
+* **Error Boundary Events:** Anticipate system failures by attaching boundary events to tasks, seamlessly catching exceptions and routing tokens to defined fallback paths.
 
 ## **Technical Dependencies**
 
@@ -33,6 +36,7 @@ The package splits responsibilities into three distinct, elegant components:
 1. **The Parser (BpmnParserService):** Parses the standard BPMN 2.0 XML schema exported by the frontend canvas, building a structured graph of database models (WorkflowNode and WorkflowEdge).
 2. **The Interpreter (BpmnInterpreterWorkflow):** A single flat execution loop that steps through the parsed graph. When it encounters tasks or a gateway, it evaluates expressions, schedules activities, or suspends itself.
 3. **The Sync Barrier (Parallel Gateways):** When encountering a parallel split, the interpreter spawns autonomous **Child Workflows** for each branch. They execute concurrently and reunite at the converging join gateway, safely avoiding PHP's native Generator serialization constraints.
+4. **State Projection:** Updates to active pointers are safely managed via deterministic `sideEffects`, ensuring your `workflow_instances` and `workflow_tokens` tables are always perfectly synchronized with the background queue state.
 
 ## **Installation**
 
@@ -125,7 +129,7 @@ Both commands will interactively ask for an alias (e.g., send_welcome_email) and
 4. Set the implementation keys on your service tasks to match your config/bpmn-engine.php mapping.
 5. Click **Save & Compile**.
 
-### **3. Element Templates**
+### **Element Templates**
 
 To make designing easier for non-technical users, you can generate custom process nodes (Element Templates) for the properties panel.
 
@@ -134,6 +138,26 @@ php artisan bpmn:make-template "Send Welcome Email"
 ```
 
 This generates a JSON configuration file in your host application (resources/bpmn/templates/). When applied to a Service Task in the visual designer, it automatically hides complex technical fields and wires up the correct backend implementation class.
+
+### **Managing Instances & Tokens**
+
+You can view, suspend, resume, and halt running workflows from the included dashboard or the command line.
+
+#### Web Dashboard:
+
+Navigate to /bpmn/instances to see a real-time list of active processes and their concurrent token locations.
+
+#### Command Line Controls:
+
+```bash
+# List all recent instances
+php artisan bpmn:instance list
+
+# Intervene in a specific execution
+php artisan bpmn:instance suspend {id}
+php artisan bpmn:instance resume {id}
+php artisan bpmn:instance halt {id}
+```
 
 ### **Launching an Execution**
 
