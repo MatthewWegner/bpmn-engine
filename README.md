@@ -93,8 +93,8 @@ Open config/bpmn-engine.php. This file maps the string identifiers in your visua
 ```php
 return [
     'activities' => [
-        'send_welcome_email' => \\App\\Workflows\\Activities\\SendWelcomeEmailActivity::class,
-        'calculate_taxes'    => \\App\\Workflows\\Activities\\CalculateTaxesActivity::class,
+        'send_welcome_email' => \App\Workflows\Activities\SendWelcomeEmailActivity::class,
+        'calculate_taxes'    => \App\Workflows\Activities\CalculateTaxesActivity::class,
     ],
 ];
 ```
@@ -164,9 +164,9 @@ php artisan bpmn:instance halt {id}
 To dispatch a compiled workflow from anywhere in your Laravel application:
 
 ```php
-use MatthewWegner\\BpmnEngine\\Models\\WorkflowDefinition;
-use MatthewWegner\\BpmnEngine\\Workflows\\BpmnInterpreterWorkflow;
-use Workflow\\WorkflowStub;
+use MatthewWegner\BpmnEngine\Models\WorkflowDefinition;
+use MatthewWegner\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
+use Workflow\WorkflowStub;
 
 // 1. Load the compiled layout
 $definition = WorkflowDefinition::where('key', 'onboard-user')->first();

@@ -4,6 +4,7 @@ namespace MatthewWegner\BpmnEngine\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use MatthewWegner\BpmnEngine\Models\WorkflowInstance;
 use MatthewWegner\BpmnEngine\Enums\WorkflowInstanceStatus;
 use Workflow\WorkflowStub;
@@ -86,5 +87,20 @@ class WorkflowInstanceController extends Controller
         $workflow->haltWorkflow();
 
         return back()->with('success', "Workflow instance [{$id}] permanently halted.");
+    }
+
+    /**
+     * Fetch real-time active token locations and execution status for an instance.
+     */
+    public function tokens($id): JsonResponse
+    {
+        $instance = WorkflowInstance::with('tokens')->findOrFail($id);
+
+        return response()->json([
+            'instance_id' => $instance->id,
+            'status'      => $instance->status->value,
+            'active_node_ids' => $instance->tokens->pluck('bpmn_element_id')->values()->toArray(),
+            'updated_at'  => $instance->updated_at?->toIso8601String(),
+        ]);
     }
 }
