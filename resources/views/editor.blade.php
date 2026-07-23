@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BPMN Workflow Designer</title>
     
-    <!-- bpmn-js Canvas & Properties styles -->
-    <link rel="stylesheet" href="https://unpkg.com/bpmn-js@17.0.2/dist/assets/diagram-js.css" />
-    <link rel="stylesheet" href="https://unpkg.com/bpmn-js@17.0.2/dist/assets/bpmn-font/css/bpmn.css" />
-    <!-- Properties Panel CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/@bpmn-io/properties-panel/dist/assets/properties-panel.css" />
+    <link rel="stylesheet" href="{{ asset('vendor/bpmn-engine/bpmn-engine.css') }}">
 
     <style>
         html, body, #canvas {
@@ -58,7 +54,7 @@
             border-left: 1px solid #e5e7eb;
             overflow-y: auto;
         }
-        div[data-group-id="group-CamundaPlatform__AsynchronousContinuations"],
+        /* div[data-group-id="group-CamundaPlatform__AsynchronousContinuations"],
         div[data-group-id="group-CamundaPlatform__Form"],
         div[data-group-id="group-CamundaPlatform__Input"],
         div[data-group-id="group-CamundaPlatform__Output"],
@@ -71,7 +67,7 @@
         div[data-group-id="group-CamundaPlatform__ExtensionProperties"],
         div[data-group-id="group-CamundaPlatform__FieldInjection"] {
             display: none !important;
-        }
+        } */
     </style>
 </head>
 <body>
@@ -90,7 +86,7 @@
     </div>
 
     <!-- Load bpmn-js compiled package asset -->
-    <script src="{{ asset('vendor/bpmn-engine/bpmn-modeler.js') }}"></script>
+    <script src="{{ asset('vendor/bpmn-engine/bpmn-engine.js') }}"></script>
     
     <script>
         // Use a safe JSON-decoding assignment to prevent raw quotes or newlines from breaking JS syntax

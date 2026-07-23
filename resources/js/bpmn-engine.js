@@ -1,7 +1,13 @@
-import BpmnModeler from 'bpmn-js/lib/Modeler';
-import BpmnNavigatedViewer from 'bpmn-js/lib/NavigatedViewer'; // NEW: Import the viewer
-
+// --- Core CSS Imports ---
+import 'bpmn-js/dist/assets/diagram-js.css';
+import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css';
+import '@bpmn-io/properties-panel/dist/assets/properties-panel.css';
 import '@bpmn-io/element-template-chooser/dist/element-template-chooser.css';
+import 'bpmn-js-token-simulation/assets/css/bpmn-js-token-simulation.css';
+
+// --- Module Imports ---
+import BpmnModeler from 'bpmn-js/lib/Modeler';
+import BpmnNavigatedViewer from 'bpmn-js/lib/NavigatedViewer';
 import ElementTemplateChooserModule from '@bpmn-io/element-template-chooser';
 
 import {
@@ -9,17 +15,10 @@ import {
     BpmnPropertiesProviderModule,
     CamundaPlatformPropertiesProviderModule
 } from 'bpmn-js-properties-panel';
-
-import {
-    ElementTemplatesPropertiesProviderModule, // Camunda 7 Element Templates
-    // CloudElementTemplatesPropertiesProviderModule // Camunda 8 Element Templates
-} from 'bpmn-js-element-templates';
-
+import { ElementTemplatesPropertiesProviderModule } from 'bpmn-js-element-templates';
 import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda.json';
 
-// Custom menu overrides
-import { CustomPaletteModule } from './CustomPaletteProvider.js';
-import { CustomContextPadModule } from './CustomContextPadProvider.js';
+import TokenSimulationModule from 'bpmn-js-token-simulation';
 
 // Expose a globally accessible initialization function
 window.initBpmnDesigner = function(initialXml, elementTemplates, saveCallback) {
@@ -34,9 +33,7 @@ window.initBpmnDesigner = function(initialXml, elementTemplates, saveCallback) {
             CamundaPlatformPropertiesProviderModule,
             ElementTemplatesPropertiesProviderModule,
             ElementTemplateChooserModule,
-            // CloudElementTemplatesPropertiesProviderModule,
-            CustomPaletteModule/*, // Inject custom palette
-            CustomContextPadModule*/ // Inject the context pad filter
+            TokenSimulationModule // Inject the simulator into the toolkit
         ],
         moddleExtensions: {
             camunda: camundaModdleDescriptor

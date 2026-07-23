@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BPMN Live Execution Demo</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/bpmn-js@17.0.2/dist/assets/diagram-js.css" />
-    <link rel="stylesheet" href="https://unpkg.com/bpmn-js@17.0.2/dist/assets/bpmn-font/css/bpmn.css" />
+
+    <!-- Load unified local CSS bundle -->
+    <link rel="stylesheet" href="{{ asset('vendor/bpmn-engine/bpmn-engine.css') }}">
     
     <style>
         .bpmn-active-token:not(.djs-connection) .djs-visual > :nth-child(1) {
