@@ -59,9 +59,6 @@ class BpmnEngineServiceProvider extends ServiceProvider
         }
 
         $this->registerGates();
-
-        // Automate Filament Shield integration if the app uses it
-        $this->registerWithFilamentShield();
     }
 
     public function register()
@@ -87,28 +84,5 @@ class BpmnEngineServiceProvider extends ServiceProvider
         Gate::define('bpmn:suspend-instance', fn ($user = null) => app()->environment('local'));
         Gate::define('bpmn:resume-instance', fn ($user = null) => app()->environment('local'));
         Gate::define('bpmn:halt-instance', fn ($user = null) => app()->environment('local'));
-    }
-
-    protected function registerWithFilamentShield(): void
-    {
-        // Check if Filament Shield's config has been loaded by the host app
-        if ($this->app->has('config') && config()->has('filament-shield')) {
-            
-            // Force the "Custom Permissions" UI tab to stay active
-            config([
-                'filament-shield.shield_resource.tabs.custom_permissions' => true,
-                'filament-shield.entities.custom_permissions' => true,
-            ]);
-
-            // Dynamically merge package's permissions into the app's existing config
-            $currentCustomPermissions = config('filament-shield.custom_permissions', []);
-            
-            config([
-                'filament-shield.custom_permissions' => array_merge($currentCustomPermissions, [
-                    'bpmn:view' => 'View BPMN Workflows',
-                    'bpmn:edit' => 'Edit BPMN Workflows',
-                ]),
-            ]);
-        }
     }
 }
