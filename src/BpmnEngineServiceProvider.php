@@ -28,16 +28,6 @@ class BpmnEngineServiceProvider extends ServiceProvider
             ->middleware(config('bpmn-engine.middleware', ['web']))
             ->group(__DIR__ . '/../routes/web.php');
 
-        // Define default gates for capability control
-        Gate::define('bpmn:view', function ($user = null) {
-            // Default fallback: host app can override this in their AuthServiceProvider
-            return app()->environment('local'); 
-        });
-
-        Gate::define('bpmn:edit', function ($user = null) {
-            return app()->environment('local');
-        });
-
         // Listen to all events to check for start event triggers
         Event::listen('*', [WorkflowTriggerListener::class, 'handle']);
 
