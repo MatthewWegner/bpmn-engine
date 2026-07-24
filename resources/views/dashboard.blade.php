@@ -20,6 +20,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Left Panel: Form to Create Workflows -->
+             @can('bpmn:edit')
             <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 h-fit">
                 <h2 class="text-lg font-bold text-gray-800 mb-4">Create New Workflow</h2>
                 
@@ -42,6 +43,11 @@
                     </button>
                 </form>
             </div>
+            @else
+            <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 h-fit text-center">
+                <p class="text-sm text-gray-500">You do not have permission to create new workflows.</p>
+            </div>
+            @endcan
 
             <!-- Right Panel: List of Current Workflows -->
             <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -74,10 +80,12 @@
                                             </span>
                                         </td>
                                         <td class="py-4 px-4 text-right">
+                                            @can('bpmn:edit')
                                             <a href="{{ route('bpmn.design', $def->id) }}" class="inline-flex items-center text-xs font-bold text-indigo-600 hover:text-indigo-900">
                                                 Design & Model
                                                 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                                             </a>
+                                            @endcan
                                         </td>
                                     </tr>
                                 @endforeach

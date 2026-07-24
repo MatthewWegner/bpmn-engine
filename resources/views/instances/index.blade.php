@@ -90,23 +90,29 @@
                             <td class="py-4 px-4 text-right space-x-2">
                                 <!-- Suspend/Resume Buttons -->
                                 @if($instance->status->value === 'running')
+                                    @can('bpmn:suspend-instance')
                                     <form action="{{ route('bpmn.instances.suspend', $instance->id) }}" method="POST" class="inline-block">
                                         @csrf
                                         <button type="submit" class="text-yellow-600 hover:text-yellow-900 font-semibold text-xs">Suspend</button>
                                     </form>
+                                    @endcan
                                 @elseif($instance->status->value === 'suspended')
+                                    @can('bpmn:resume-instance')
                                     <form action="{{ route('bpmn.instances.resume', $instance->id) }}" method="POST" class="inline-block">
                                         @csrf
                                         <button type="submit" class="text-green-600 hover:text-green-900 font-semibold text-xs">Resume</button>
                                     </form>
+                                    @endcan
                                 @endif
 
                                 <!-- Halt Button -->
                                 @if(in_array($instance->status->value, ['running', 'suspended']))
+                                    @can('bpmn:halt-instance')
                                     <form action="{{ route('bpmn.instances.halt', $instance->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to permanently halt this workflow?');">
                                         @csrf
                                         <button type="submit" class="text-red-600 hover:text-red-900 font-semibold text-xs ml-2">Halt</button>
                                     </form>
+                                    @endcan
                                 @endif
                             </td>
                         </tr>

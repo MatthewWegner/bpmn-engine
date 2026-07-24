@@ -5,9 +5,10 @@ namespace MatthewWegner\BpmnEngine\Http\Controllers;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Gate;
 use MatthewWegner\BpmnEngine\Models\WorkflowDefinition;
 use MatthewWegner\BpmnEngine\Services\BpmnParserService;
-use Illuminate\Support\Facades\File;
 use Exception;
 
 class WorkflowController extends Controller
@@ -24,8 +25,9 @@ class WorkflowController extends Controller
      */
     public function index()
     {
+        Gate::authorize('bpmn:view');
+
         $definitions = WorkflowDefinition::with('versions')->get();
-        
         return view('bpmn-engine::dashboard', compact('definitions'));
     }
 
@@ -34,6 +36,8 @@ class WorkflowController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('bpmn:edit'); // Prevent unauthorized users from making changes
+
         $request->validate([
             'name' => 'required|string|max:255',
             'key'  => 'required|alpha_dash|unique:workflow_definitions,key',
@@ -49,6 +53,8 @@ class WorkflowController extends Controller
 
     public function storeVersion(Request $request, $definitionId): JsonResponse
     {
+        Gate::authorize('bpmn:edit');
+
         $request->validate([
             'xml' => 'required|string',
         ]);
@@ -93,6 +99,8 @@ class WorkflowController extends Controller
      */
     public function design($definitionId)
     {
+        Gate::authorize('bpmn:view'); // Or 'bpmn:edit' depending on how strict we want the canvas to be
+
         $definition = WorkflowDefinition::findOrFail($definitionId);
         
         // Grab the latest saved XML string

@@ -5,6 +5,7 @@ namespace MatthewWegner\BpmnEngine\Http\Controllers;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
 use MatthewWegner\BpmnEngine\Models\WorkflowInstance;
 use MatthewWegner\BpmnEngine\Enums\WorkflowInstanceStatus;
 use Workflow\WorkflowStub;
@@ -16,6 +17,8 @@ class WorkflowInstanceController extends Controller
      */
     public function index()
     {
+        Gate::authorize('bpmn:view');
+
         // Eager load the version, definition, and active tokens
         $instances = WorkflowInstance::with(['version.definition', 'tokens'])
             ->orderBy('id', 'desc')
@@ -30,6 +33,8 @@ class WorkflowInstanceController extends Controller
      */
     public function suspend($id)
     {
+        Gate::authorize('bpmn:suspend-instance');
+
         $instance = WorkflowInstance::findOrFail($id);
 
         if ($instance->status !== WorkflowInstanceStatus::RUNNING) {
@@ -50,6 +55,8 @@ class WorkflowInstanceController extends Controller
      */
     public function resume($id)
     {
+        Gate::authorize('bpmn:resume-instance');
+
         $instance = WorkflowInstance::findOrFail($id);
 
         if ($instance->status !== WorkflowInstanceStatus::SUSPENDED) {
@@ -71,6 +78,8 @@ class WorkflowInstanceController extends Controller
      */
     public function halt($id)
     {
+        Gate::authorize('bpmn:halt-instance');
+
         $instance = WorkflowInstance::findOrFail($id);
 
         if (
@@ -94,6 +103,8 @@ class WorkflowInstanceController extends Controller
      */
     public function tokens($id): JsonResponse
     {
+        Gate::authorize('bpmn:view');
+        
         $instance = WorkflowInstance::with('tokens')->findOrFail($id);
 
         return response()->json([
