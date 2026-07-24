@@ -4,8 +4,10 @@ namespace MatthewWegner\BpmnEngine\Tests;
 
 use Orchestra\Testbench\TestCase as Orchestra;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use MatthewWegner\BpmnEngine\BpmnEngineServiceProvider;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Facades\Gate;
 use Workflow\Providers\WorkflowServiceProvider;
+use MatthewWegner\BpmnEngine\BpmnEngineServiceProvider;
 
 class TestCase extends Orchestra
 {
@@ -19,9 +21,10 @@ class TestCase extends Orchestra
         $this->loadLaravelMigrations();
 
         // Automatically grant BPMN gates during test runs so they don't throw 403s
-        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+        // The '?' is critical here! It tells Laravel to run this even for guests.
+        Gate::before(function (?Authenticatable $user, $ability) {
             if (str_starts_with($ability, 'bpmn:')) {
-                return true; // Allow all bpmn:* gates during test execution
+                return true; // Auto-pass all BPMN permissions during testing
             }
         });
     }
