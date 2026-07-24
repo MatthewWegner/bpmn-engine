@@ -19,12 +19,13 @@ class BpmnEngineServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'bpmn-engine');
 
         // Load the package's internal API routes
-        Route::prefix('api/bpmn')
+        Route::prefix(config('bpmn-engine.api_prefix', 'api/bpmn'))
             ->middleware(config('bpmn-engine.api_middleware', ['api']))
             ->group(__DIR__ . '/../routes/api.php');
 
         // Tell the host app where to find web routes
-        Route::middleware(config('bpmn-engine.middleware', ['web']))
+        Route::prefix(config('bpmn-engine.prefix', 'bpmn/workflows'))
+            ->middleware(config('bpmn-engine.middleware', ['web']))
             ->group(__DIR__ . '/../routes/web.php');
 
         // Define default gates for capability control

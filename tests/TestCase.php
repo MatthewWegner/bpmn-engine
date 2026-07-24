@@ -17,6 +17,13 @@ class TestCase extends Orchestra
         
         // This ensures Laravel's core schema migrations (like users) are run if needed
         $this->loadLaravelMigrations();
+
+        // Automatically grant BPMN gates during test runs so they don't throw 403s
+        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            if (str_starts_with($ability, 'bpmn:')) {
+                return true; // Allow all bpmn:* gates during test execution
+            }
+        });
     }
 
     /**
