@@ -1,15 +1,13 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine\Handlers\Nodes;
+namespace MatthewWegner\BpmnEngine\Handlers\Nodes\Events;
 
 use MatthewWegner\BpmnEngine\Contracts\BpmnNodeHandlerInterface;
 use MatthewWegner\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
 use MatthewWegner\BpmnEngine\Models\WorkflowNode;
 use MatthewWegner\BpmnEngine\Models\WorkflowVersion;
-use MatthewWegner\BpmnEngine\Services\GatewayRouter;
 
-// Exclusive Gateways (Routing)
-class ExclusiveGatewayHandler implements BpmnNodeHandlerInterface
+class EndEventHandler implements BpmnNodeHandlerInterface
 {
     public function handle(
         BpmnInterpreterWorkflow $workflow,
@@ -19,10 +17,9 @@ class ExclusiveGatewayHandler implements BpmnNodeHandlerInterface
         ?int $instanceId
     ): \Generator
     {
-        $router = new GatewayRouter();
-        $nextNodeId = $router->getNextNodeId($version, $node->bpmn_element_id, $userData);
-
         yield from []; // Satisfies the Generator return type
-        return [$nextNodeId, $userData];
+        
+        // Terminal node; there is no next node.
+        return [null, $userData];
     }
 }

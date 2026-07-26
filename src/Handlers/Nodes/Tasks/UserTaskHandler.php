@@ -1,6 +1,6 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine\Handlers\Nodes;
+namespace MatthewWegner\BpmnEngine\Handlers\Nodes\Tasks;
 
 use MatthewWegner\BpmnEngine\Contracts\BpmnNodeHandlerInterface;
 use MatthewWegner\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
