@@ -50,3 +50,77 @@ it('parses a basic bpmn xml file into database nodes and edges', function () {
     expect($taskNode->bpmn_element_id)->toBe('Task_ChargeCard')
         ->and($taskNode->implementation)->toBe('charge_credit_card');
 });
+
+it('throws an exception when parsing completely malformed xml', function () {
+    $definition = WorkflowDefinition::create([
+        'name' => 'Malformed XML',
+        'key'  => 'malformed-xml',
+    ]);
+    
+    $version = $definition->versions()->create([
+        'version'   => 1,
+        'bpmn_xml'  => '<xml>fake</xml>',
+        'is_active' => true,
+    ]);
+
+    // A string that is completely invalid XML syntax
+    $xmlString = "This is just a random string, not XML.";
+
+    $parser = new BpmnParserService();
+    
+    // SimpleXMLElement throws a generic Exception when it fails to parse
+    $parser->parseAndStore($version, $xmlString);
+})->throws(Exception::class);
+
+
+it('throws an exception when the xml lacks a process element', function () {
+    $definition = WorkflowDefinition::create([
+        'name' => 'No Process XML',
+        'key'  => 'no-process-xml',
+    ]);
+    
+    $version = $definition->versions()->create([
+        'version'   => 1,
+        'bpmn_xml'  => '<xml>fake</xml>',
+        'is_active' => true,
+    ]);
+
+    // Structurally valid XML, but missing the <bpmn:process> block
+    $xmlString = <<<XML
+    <?xml version="1.0" encoding="UTF-8"?>
+    <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" id="Definitions_1">
+      <!-- Missing bpmn:process here -->
+    </bpmn:definitions>
+    XML;
+
+    $parser = new BpmnParserService();
+    $parser->parseAndStore($version, $xmlString);
+})->throws(Exception::class, 'Invalid BPMN file: <bpmn:process> element not found.');
+
+
+it('throws an exception if the standard BPMN namespace is incorrect', function () {
+    $definition = WorkflowDefinition::create([
+        'name' => 'Bad Namespace',
+        'key'  => 'bad-namespace',
+    ]);
+    
+    $version = $definition->versions()->create([
+        'version'   => 1,
+        'bpmn_xml'  => '<xml>fake</xml>',
+        'is_active' => true,
+    ]);
+
+    // The process block exists, but the namespace xmlns:bpmn is completely wrong.
+    // The XPath '//bpmn:process' will fail to find it.
+    $xmlString = <<<XML
+    <?xml version="1.0" encoding="UTF-8"?>
+    <bpmn:definitions xmlns:bpmn="http://wrong-url.org/MODEL" id="Definitions_1">
+      <bpmn:process id="Process_1" isExecutable="true">
+        <bpmn:startEvent id="StartEvent_1" />
+      </bpmn:process>
+    </bpmn:definitions>
+    XML;
+
+    $parser = new BpmnParserService();
+    $parser->parseAndStore($version, $xmlString);
+})->throws(Exception::class, 'Invalid BPMN file: <bpmn:process> element not found.');
