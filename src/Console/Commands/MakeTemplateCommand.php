@@ -23,6 +23,10 @@ class MakeTemplateCommand extends Command
         $id = Str::studly($name);
         $fileName = Str::kebab($name) . '.json';
         
+        // Dynamically generate a safe reverse-domain app ID
+        $safeAppName = Str::slug(config('app.name', 'laravel'));
+        $appId = "com.{$safeAppName}.tasks";
+
         $directory = resource_path('bpmn/templates');
         $path = $directory . '/' . $fileName;
 
@@ -38,8 +42,8 @@ class MakeTemplateCommand extends Command
         $stub = File::get(__DIR__ . '/../../../stubs/bpmn-template.stub');
 
         $content = str_replace(
-            ['{{ name }}', '{{ id }}', '{{ activityKey }}'],
-            [$name, $id, $activityKey],
+            ['{{ name }}', '{{ id }}', '{{ activityKey }}', '{{ appId }}'],
+            [$name, $id, $activityKey, $appId],
             $stub
         );
 

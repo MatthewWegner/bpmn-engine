@@ -1,7 +1,7 @@
 [
   {
     "name": "{{ name }}",
-    "id": "com.saccharine.tasks.{{ id }}",
+    "id": "{{ appId }}.{{ id }}",
     "appliesTo": [
       "bpmn:ServiceTask"
     ],
