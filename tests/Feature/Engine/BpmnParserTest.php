@@ -111,7 +111,6 @@ it('throws an exception if the standard BPMN namespace is incorrect', function (
     ]);
 
     // The process block exists, but the namespace xmlns:bpmn is completely wrong.
-    // The XPath '//bpmn:process' will fail to find it.
     $xmlString = <<<XML
     <?xml version="1.0" encoding="UTF-8"?>
     <bpmn:definitions xmlns:bpmn="http://wrong-url.org/MODEL" id="Definitions_1">
@@ -123,4 +122,28 @@ it('throws an exception if the standard BPMN namespace is incorrect', function (
 
     $parser = new BpmnParserService();
     $parser->parseAndStore($version, $xmlString);
-})->throws(Exception::class, 'Invalid BPMN file: <bpmn:process> element not found.');
+})->throws(\Exception::class, 'Invalid BPMN file: Incorrect or missing BPMN namespace URI.');
+
+it('throws an exception if the //bpmn:process block is not found', function () {
+    $definition = WorkflowDefinition::create([
+        'name' => 'Missing Process',
+        'key'  => 'missing-process',
+    ]);
+    
+    $version = $definition->versions()->create([
+        'version'   => 1,
+        'bpmn_xml'  => '<xml>fake</xml>',
+        'is_active' => true,
+    ]);
+
+    // The process block exists, but the namespace xmlns:bpmn is completely wrong.
+    // The XPath '//bpmn:process' will fail to find it.
+    $xmlString = <<<XML
+    <?xml version="1.0" encoding="UTF-8"?>
+    <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" id="Definitions_1">
+    </bpmn:definitions>
+    XML;
+
+    $parser = new BpmnParserService();
+    $parser->parseAndStore($version, $xmlString);
+})->throws(\Exception::class, 'Invalid BPMN file: <bpmn:process> element not found.');

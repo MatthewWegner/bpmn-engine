@@ -13,8 +13,22 @@ class BpmnParserService
     {
         $xml = new SimpleXMLElement($xmlString);
 
-        // Register the namespaces required to read standard and Camunda tags
-        $xml->registerXPathNamespace('bpmn', 'http://omg.org/spec/BPMN/20100524/MODEL');
+        // STRICT NAMESPACE VALIDATION
+        // Extract all namespaces used in the document
+        $namespaces = $xml->getNamespaces(true);
+        $bpmnUri = $namespaces['bpmn'] ?? null;
+
+        $validBPMNURIs = [
+            'http://www.omg.org/spec/BPMN/20100524/MODEL',
+            'http://omg.org/spec/BPMN/20100524/MODEL'
+        ];
+
+        if (!in_array($bpmnUri, $validBPMNURIs)) {
+            throw new Exception('Invalid BPMN file: Incorrect or missing BPMN namespace URI.');
+        }
+
+        // Register namespaces for XPath querying
+        $xml->registerXPathNamespace('bpmn', $bpmnUri); // Safely use the exact matching valid URI
         $xml->registerXPathNamespace('camunda', 'http://camunda.org/schema/1.0/bpmn');
 
         // Build a dictionary of global BPMN Messages
