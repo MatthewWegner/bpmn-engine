@@ -57,6 +57,24 @@ class BpmnInterpreterWorkflow extends Workflow
     {
         $this->isHalted = true;
     }
+    
+    /**
+     * Wrapper for durable-workflow's Inbox::hasUnread() method.
+     * This isolated testing, since Inbox is declared as final.
+     */
+    public function hasUnreadInbox()
+    {
+        return $this->inbox->hasUnread();
+    }
+
+    /**
+     * Wrapper for durable-workflow's Inbox::nextUnread() method.
+     * This isolated testing, since Inbox is declared as final.
+     */
+    public function readNextInboxMessage(): mixed
+    {
+        return $this->inbox->nextUnread();
+    }
 
     /**
      * Wrapper for durable-workflow's static ActivityStub creation.

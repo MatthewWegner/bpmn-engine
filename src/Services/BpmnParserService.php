@@ -102,6 +102,9 @@ class BpmnParserService
                             $implementation = (string) $errorDef['errorRef'] ?? 'general_error';
                         } elseif (!empty($element->xpath('.//bpmn:timerEventDefinition'))) {
                             $eventDefType = 'timer';
+                            // Extract the ISO 8601 duration (e.g., 'PT2H')
+                            $timerDef = $element->xpath('.//bpmn:timerEventDefinition/bpmn:timeDuration');
+                            $implementation = !empty($timerDef) ? (string) $timerDef[0] : 'PT1H'; // Default to 1 hour if missing
                         } elseif (!empty($element->xpath('.//bpmn:messageEventDefinition'))) {
                             $eventDefType = 'message';
                         }
