@@ -24,7 +24,7 @@ it('yields a child workflow stub for the internal scope and merges the returned 
     // We expect the handler to ask the interpreter to spawn a scoped child workflow
     // It should pass the subProcess node ID so the child knows its execution boundaries
     $workflow->shouldReceive('makeScopedChildWorkflow')
-             ->with('SubProcess_1', ['base_data' => 100], null)
+             ->with($version->id, 'SubProcess_1', ['base_data' => 100], null)
              ->once()
              ->andReturn('mocked_scoped_child_stub');
 

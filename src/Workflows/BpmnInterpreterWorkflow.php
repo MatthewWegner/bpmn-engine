@@ -76,6 +76,27 @@ class BpmnInterpreterWorkflow extends Workflow
         return \Workflow\ChildWorkflowStub::make(self::class, $versionId, $userData, $startNodeId, $instanceId);
     }
 
+    /**
+     * Wrapper for durable-workflow's static ChildWorkflowStub creation.
+     * Used for inline Sub-Processes to execute a scoped subset of nodes.
+     */
+    public function makeScopedChildWorkflow(int $versionId, string $subProcessNodeId, array $userData, ?int $instanceId = null)
+    {
+        $version = WorkflowVersion::with('nodes')->find($versionId);
+        
+        // Find the start event strictly scoped inside this sub-process
+        $startNode = $version->nodes
+            ->where('type', 'startEvent')
+            ->where('parent_element_id', $subProcessNodeId)
+            ->first();
+
+        if (!$startNode) {
+            throw new RuntimeException("BPMN Engine Error: No startEvent found inside Sub-Process [{$subProcessNodeId}].");
+        }
+
+        return \Workflow\ChildWorkflowStub::make(self::class, $versionId, $userData, $startNode->bpmn_element_id, $instanceId);
+    }
+
     // Add the optional 3rd parameter for branch executions
     public function execute(
         int $versionId,
@@ -90,14 +111,18 @@ class BpmnInterpreterWorkflow extends Workflow
 
         // If no start node is provided, this is the Master Workflow starting from the beginning
         if ($startNodeId === null) {
-            // Find the start event
-            $startNode = $version->nodes->where('type', 'startEvent')->first();
+            // Find the global start event (it must NOT belong to a sub-process)
+            $startNode = $version->nodes
+                ->where('type', 'startEvent')
+                ->whereNull('parent_element_id') // Ensure it only picks up top-level start events
+                ->first();
+
             if (!$startNode) {
-                throw new RuntimeException("No startEvent found.");
+                throw new RuntimeException("No global startEvent found.");
             }
             $currentNodeId = $startNode->bpmn_element_id;
         } else {
-            // This is a Child Workflow starting its specific branch
+            // This is a Child Workflow starting its specific branch or sub-process
             $currentNodeId = $startNodeId;
         }
 

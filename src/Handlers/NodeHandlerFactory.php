@@ -15,6 +15,7 @@ class NodeHandlerFactory
         'exclusiveGateway' => Nodes\Gateways\ExclusiveGatewayHandler::class,
         'parallelGateway'  => Nodes\Gateways\ParallelGatewayHandler::class,
         'callActivity'     => Nodes\Tasks\CallActivityHandler::class,
+        'subProcess'       => Nodes\Tasks\SubProcessHandler::class,
     ];
 
     public static function make(string $type): BpmnNodeHandlerInterface
