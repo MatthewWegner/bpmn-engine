@@ -147,3 +147,79 @@ it('throws an exception if the //bpmn:process block is not found', function () {
     $parser = new BpmnParserService();
     $parser->parseAndStore($version, $xmlString);
 })->throws(\Exception::class, 'Invalid BPMN file: <bpmn:process> element not found.');
+
+it('parses a call activity and extracts the calledElement attribute as its implementation', function () {
+    $definition = \MatthewWegner\BpmnEngine\Models\WorkflowDefinition::create([
+        'name' => 'Caller Process',
+        'key'  => 'caller-process',
+    ]);
+    
+    $version = $definition->versions()->create([
+        'version'   => 1,
+        'bpmn_xml'  => '<xml>fake</xml>',
+        'is_active' => true,
+    ]);
+
+    // A minimal XML string featuring a callActivity
+    $xmlString = <<<XML
+    <?xml version="1.0" encoding="UTF-8"?>
+    <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" id="Definitions_1">
+      <bpmn:process id="Process_1" isExecutable="true">
+        <bpmn:callActivity id="CallActivity_1" name="Process Billing" calledElement="billing-process" />
+      </bpmn:process>
+    </bpmn:definitions>
+    XML;
+
+    $parser = new \MatthewWegner\BpmnEngine\Services\BpmnParserService();
+    $parser->parseAndStore($version, $xmlString);
+
+    $callNode = \MatthewWegner\BpmnEngine\Models\WorkflowNode::where('type', 'callActivity')->first();
+    
+    expect($callNode)->not->toBeNull()
+        ->and($callNode->bpmn_element_id)->toBe('CallActivity_1')
+        ->and($callNode->implementation)->toBe('billing-process'); // Maps to calledElement
+});
+
+it('parses an inline sub-process and assigns a parent_element_id to its internal children', function () {
+    $definition = \MatthewWegner\BpmnEngine\Models\WorkflowDefinition::create([
+        'name' => 'SubProcess Process',
+        'key'  => 'subprocess-process',
+    ]);
+    
+    $version = $definition->versions()->create([
+        'version'   => 1,
+        'bpmn_xml'  => '<xml>fake</xml>',
+        'is_active' => true,
+    ]);
+
+    // A minimal XML string featuring an inline subProcess and internal nodes
+    $xmlString = <<<XML
+    <?xml version="1.0" encoding="UTF-8"?>
+    <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1">
+      <bpmn:process id="Process_1" isExecutable="true">
+        <bpmn:subProcess id="SubProcess_1" name="Grouped Tasks">
+          <bpmn:startEvent id="SubStart_1" />
+          <bpmn:serviceTask id="SubTask_1" name="Internal Action" camunda:class="internal_action" />
+          <bpmn:endEvent id="SubEnd_1" />
+          <bpmn:sequenceFlow id="Flow_S1" sourceRef="SubStart_1" targetRef="SubTask_1" />
+          <bpmn:sequenceFlow id="Flow_S2" sourceRef="SubTask_1" targetRef="SubEnd_1" />
+        </bpmn:subProcess>
+      </bpmn:process>
+    </bpmn:definitions>
+    XML;
+
+    $parser = new \MatthewWegner\BpmnEngine\Services\BpmnParserService();
+    $parser->parseAndStore($version, $xmlString);
+
+    // Verify the subProcess node itself was created
+    $subProcessNode = \MatthewWegner\BpmnEngine\Models\WorkflowNode::where('type', 'subProcess')->first();
+    expect($subProcessNode)->not->toBeNull()
+        ->and($subProcessNode->bpmn_element_id)->toBe('SubProcess_1');
+
+    // Verify the internal tasks were created and scoped to the parent subProcess
+    $internalTask = \MatthewWegner\BpmnEngine\Models\WorkflowNode::where('bpmn_element_id', 'SubTask_1')->first();
+    
+    expect($internalTask)->not->toBeNull()
+        ->and($internalTask->type)->toBe('serviceTask')
+        ->and($internalTask->parent_element_id)->toBe('SubProcess_1');
+});
