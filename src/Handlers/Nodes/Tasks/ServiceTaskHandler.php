@@ -33,7 +33,9 @@ class ServiceTaskHandler implements BpmnNodeHandlerInterface
             // Attempt the standard execution
             
             // Yield hands control back to Laravel Workflow to execute this safely on the queues
-            $activityResult = yield ActivityStub::make($activityClass, $userData);
+            // $activityResult = yield ActivityStub::make($activityClass, $userData);
+            // Update to use the workflow's wrapper
+            $activityResult = yield $workflow->makeActivity($activityClass, $userData);
 
             // Merge the results back into the global state
             $userData = array_merge($userData, $activityResult);

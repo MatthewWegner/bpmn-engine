@@ -13,7 +13,8 @@ it('advances the token to the next sequential node', function () {
     $version->nodes()->create(['bpmn_element_id' => 'Task_1', 'type' => 'serviceTask']);
     $version->edges()->create(['bpmn_element_id' => 'Flow_1', 'source_node_id' => 'Start_1', 'target_node_id' => 'Task_1']);
 
-    $workflow = WorkflowStub::make(BpmnInterpreterWorkflow::class);
+    // $workflow = WorkflowStub::make(BpmnInterpreterWorkflow::class);
+    $workflow = \Mockery::mock(BpmnInterpreterWorkflow::class)->makePartial();
     $handler = new StartEventHandler();
 
     $userData = ['process_started' => true];

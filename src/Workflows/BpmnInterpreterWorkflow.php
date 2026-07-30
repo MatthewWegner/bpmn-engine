@@ -58,6 +58,15 @@ class BpmnInterpreterWorkflow extends Workflow
         $this->isHalted = true;
     }
 
+    /**
+     * Wrapper for durable-workflow's static ActivityStub creation.
+     * This decouples the handlers from the static context, allowing for isolated testing.
+     */
+    public function makeActivity(string $activityClass, array $userData)
+    {
+        return \Workflow\ActivityStub::make($activityClass, $userData);
+    }
+
     // Add the optional 3rd parameter for branch executions
     public function execute(
         int $versionId,

@@ -27,7 +27,8 @@ it('evaluates expression logic and routes the token to the correct path', functi
         'condition_expression' => 'amount <= 1000'
     ]);
 
-    $workflow = WorkflowStub::make(BpmnInterpreterWorkflow::class);
+    // $workflow = WorkflowStub::make(BpmnInterpreterWorkflow::class);
+    $workflow = \Mockery::mock(BpmnInterpreterWorkflow::class)->makePartial();
     $handler = new ExclusiveGatewayHandler();
 
     // Test Path A execution

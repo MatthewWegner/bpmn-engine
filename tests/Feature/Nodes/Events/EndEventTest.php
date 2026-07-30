@@ -11,7 +11,8 @@ it('returns a null node ID to terminate the execution path', function () {
     
     $endNode = $version->nodes()->create(['bpmn_element_id' => 'End_1', 'type' => 'endEvent']);
 
-    $workflow = WorkflowStub::make(BpmnInterpreterWorkflow::class);
+    // $workflow = WorkflowStub::make(BpmnInterpreterWorkflow::class);
+    $workflow = \Mockery::mock(BpmnInterpreterWorkflow::class)->makePartial();
     $handler = new EndEventHandler();
 
     $generator = $handler->handle($workflow, $endNode, $version, ['status' => 'completed'], null);
