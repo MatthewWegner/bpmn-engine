@@ -7,7 +7,6 @@ use MatthewWegner\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
 use MatthewWegner\BpmnEngine\Models\WorkflowNode;
 use MatthewWegner\BpmnEngine\Models\WorkflowVersion;
 use MatthewWegner\BpmnEngine\Handlers\Traits\EvaluatesBoundaryEvents;
-use Workflow\ActivityStub;
 use Throwable;
 
 // Service Tasks (Business Logic)
