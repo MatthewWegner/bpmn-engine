@@ -6,12 +6,15 @@ use MatthewWegner\BpmnEngine\Contracts\BpmnNodeHandlerInterface;
 use MatthewWegner\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
 use MatthewWegner\BpmnEngine\Models\WorkflowNode;
 use MatthewWegner\BpmnEngine\Models\WorkflowVersion;
+use MatthewWegner\BpmnEngine\Handlers\Traits\EvaluatesBoundaryEvents;
 use Workflow\ActivityStub;
 use Throwable;
 
 // Service Tasks (Business Logic)
 class ServiceTaskHandler implements BpmnNodeHandlerInterface
 {
+    use EvaluatesBoundaryEvents;
+
     public function handle(
         BpmnInterpreterWorkflow $workflow,
         WorkflowNode $node,
@@ -22,19 +25,11 @@ class ServiceTaskHandler implements BpmnNodeHandlerInterface
     {
         $activityClass = config("bpmn-engine.activities.{$node->implementation}");
 
-        // Look for any error boundary events attached to this specific task
-        $errorBoundaryNode = $version->nodes
-            ->where('type', 'boundaryEvent')
-            ->where('event_definition_type', 'error')
-            ->where('attached_to_element_id', $node->bpmn_element_id)
-            ->first();
-
         try {
             // Attempt the standard execution
             
             // Yield hands control back to Laravel Workflow to execute this safely on the queues
-            // $activityResult = yield ActivityStub::make($activityClass, $userData);
-            // Update to use the workflow's wrapper
+            // Use the workflow's wrapper
             $activityResult = yield $workflow->makeActivity($activityClass, $userData);
 
             // Merge the results back into the global state
@@ -45,18 +40,8 @@ class ServiceTaskHandler implements BpmnNodeHandlerInterface
 
         } catch (Throwable $e) {
             // Failure: Check if we have an escape route defined in the BPMN diagram
-            if ($errorBoundaryNode) {
-                // We caught the anticipated error! 
-                // Store the error message in the payload so subsequent tasks can react to it.
-                $userData['_error_caught'] = $e->getMessage();
-                
-                // Route the token out through the boundary event's sequence flow
-                $nextNodeId = $workflow->getNextSequentialNode($version, $errorBoundaryNode->bpmn_element_id);
-            } else {
-                // No boundary event defined. Throw the error back up so durable-workflow 
-                // can handle the standard failure, logging, and retry logic.
-                throw $e;
-            }
+            // Delegate to the boundary event trait
+            $nextNodeId = $this->handleErrorBoundary($e, $version, $node->bpmn_element_id, $workflow, $userData);
         }
         
         return [$nextNodeId, $userData];
