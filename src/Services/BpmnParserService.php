@@ -59,7 +59,9 @@ class BpmnParserService
                 'startEvent', 'endEvent', 
                 'serviceTask', 'userTask', 
                 'exclusiveGateway', 'parallelGateway',
-                'boundaryEvent'
+                'boundaryEvent',
+                'callActivity',
+                'subProcess'
             ];
 
             foreach ($nodeTypes as $type) {
@@ -69,12 +71,25 @@ class BpmnParserService
                     $attributes = $element->attributes();
                     $bpmnId = (string) $attributes['id'];
                     $name = (string) ($attributes['name'] ?? '');
+
                     $attachedToRef = null;
                     $eventDefType = null;
+                    $parentElementId = null;
+
+                    // Determine if this node is nested inside a subProcess
+                    $parentElements = $element->xpath('parent::bpmn:subProcess');
+                    if (!empty($parentElements)) {
+                        $parentElementId = (string) $parentElements[0]['id'];
+                    }
 
                     // Extract the implementation key from camunda:class
                     $camundaAttrs = $element->attributes('http://camunda.org/schema/1.0/bpmn');
                     $implementation = (string) ($camundaAttrs['class'] ?? null);
+
+                    // Call Activity Extraction
+                    if ($type === 'callActivity') {
+                        $implementation = (string) $attributes['calledElement'];
+                    }
 
                     if ($type === 'boundaryEvent') {
                         $attachedToRef = (string) $attributes['attachedToRef'];
@@ -112,6 +127,7 @@ class BpmnParserService
                         'implementation'  => $implementation,
                         'attached_to_element_id' => $attachedToRef,
                         'event_definition_type'  => $eventDefType,
+                        'parent_element_id'      => $parentElementId,
                     ]);
                 }
             }

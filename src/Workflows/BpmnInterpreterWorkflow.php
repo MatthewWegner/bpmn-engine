@@ -67,6 +67,15 @@ class BpmnInterpreterWorkflow extends Workflow
         return \Workflow\ActivityStub::make($activityClass, $userData);
     }
 
+    /**
+     * Wrapper for durable-workflow's static ChildWorkflowStub creation.
+     * Used primarily for Call Activities to spawn independent workflow versions.
+     */
+    public function makeChildWorkflow(int $versionId, array $userData, ?string $startNodeId = null, ?int $instanceId = null)
+    {
+        return \Workflow\ChildWorkflowStub::make(self::class, $versionId, $userData, $startNodeId, $instanceId);
+    }
+
     // Add the optional 3rd parameter for branch executions
     public function execute(
         int $versionId,
