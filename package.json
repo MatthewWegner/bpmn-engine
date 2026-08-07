@@ -11,16 +11,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MatthewWegner/bpmn-engine.git"
+    "url": "git+https://github.com/saccharine-app/bpmn-engine.git"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/MatthewWegner/bpmn-engine/issues"
+    "url": "https://github.com/saccharine-app/bpmn-engine/issues"
   },
-  "homepage": "https://github.com/MatthewWegner/bpmn-engine#readme",
+  "homepage": "https://github.com/saccharine-app/bpmn-engine#readme",
   "dependencies": {
     "@bpmn-io/element-template-chooser": "^3.0.0",
     "@bpmn-io/properties-panel": "^3.47.0",

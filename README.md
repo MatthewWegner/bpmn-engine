@@ -52,7 +52,7 @@ For local development, link the package to a host application by adding a path r
 Then require the package:
 
 ```bash
-composer require "matthewwegner/bpmn-engine" "@dev"
+composer require "saccharine-app/bpmn-engine" "@dev"
 ```
 
 ### **2. Install and Initialize**
