@@ -1,6 +1,6 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine\Console\Commands;
+namespace Saccharine\BpmnEngine\Console\Commands;
 
 use Illuminate\Console\Command;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine\Contracts;
+namespace Saccharine\BpmnEngine\Contracts;
 
 interface BpmnTriggerableEvent
 {

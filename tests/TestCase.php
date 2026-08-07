@@ -1,13 +1,13 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine\Tests;
+namespace Saccharine\BpmnEngine\Tests;
 
 use Orchestra\Testbench\TestCase as Orchestra;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Gate;
 use Workflow\Providers\WorkflowServiceProvider;
-use MatthewWegner\BpmnEngine\BpmnEngineServiceProvider;
+use Saccharine\BpmnEngine\BpmnEngineServiceProvider;
 
 class TestCase extends Orchestra
 {

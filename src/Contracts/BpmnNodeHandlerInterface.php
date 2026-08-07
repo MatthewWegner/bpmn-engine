@@ -1,10 +1,10 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine\Contracts;
+namespace Saccharine\BpmnEngine\Contracts;
 
-use MatthewWegner\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
-use MatthewWegner\BpmnEngine\Models\WorkflowNode;
-use MatthewWegner\BpmnEngine\Models\WorkflowVersion;
+use Saccharine\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
+use Saccharine\BpmnEngine\Models\WorkflowNode;
+use Saccharine\BpmnEngine\Models\WorkflowVersion;
 
 interface BpmnNodeHandlerInterface
 {

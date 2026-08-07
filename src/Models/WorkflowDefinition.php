@@ -1,6 +1,6 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine\Models;
+namespace Saccharine\BpmnEngine\Models;
 
 use Illuminate\Database\Eloquent\Model;
 

@@ -1,11 +1,11 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine\Handlers\Nodes\Gateways;
+namespace Saccharine\BpmnEngine\Handlers\Nodes\Gateways;
 
-use MatthewWegner\BpmnEngine\Contracts\BpmnNodeHandlerInterface;
-use MatthewWegner\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
-use MatthewWegner\BpmnEngine\Models\WorkflowNode;
-use MatthewWegner\BpmnEngine\Models\WorkflowVersion;
+use Saccharine\BpmnEngine\Contracts\BpmnNodeHandlerInterface;
+use Saccharine\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
+use Saccharine\BpmnEngine\Models\WorkflowNode;
+use Saccharine\BpmnEngine\Models\WorkflowVersion;
 use Workflow\ChildWorkflowStub;
 use function Workflow\all;
 

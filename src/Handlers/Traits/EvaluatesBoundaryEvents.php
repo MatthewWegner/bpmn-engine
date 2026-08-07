@@ -1,9 +1,9 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine\Handlers\Traits;
+namespace Saccharine\BpmnEngine\Handlers\Traits;
 
-use MatthewWegner\BpmnEngine\Models\WorkflowVersion;
-use MatthewWegner\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
+use Saccharine\BpmnEngine\Models\WorkflowVersion;
+use Saccharine\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
 
 trait EvaluatesBoundaryEvents
 {

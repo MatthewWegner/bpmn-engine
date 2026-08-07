@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\File;
-use MatthewWegner\BpmnEngine\Models\WorkflowDefinition;
-use MatthewWegner\BpmnEngine\Models\WorkflowNode;
+use Saccharine\BpmnEngine\Models\WorkflowDefinition;
+use Saccharine\BpmnEngine\Models\WorkflowNode;
 
 beforeEach(function () {
     // Setup a dummy config file for the demo to register its aliases

@@ -1,6 +1,6 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine\Workflows;
+namespace Saccharine\BpmnEngine\Workflows;
 
 use Workflow\Workflow;
 use Workflow\WorkflowStub;
@@ -9,11 +9,11 @@ use Workflow\ChildWorkflowStub;
 use Workflow\SignalMethod;
 use function Workflow\await;
 use function Workflow\all;
-use MatthewWegner\BpmnEngine\Models\WorkflowVersion;
-use MatthewWegner\BpmnEngine\Models\WorkflowEdge;
-use MatthewWegner\BpmnEngine\Models\WorkflowToken;
-use MatthewWegner\BpmnEngine\Services\GatewayRouter;
-use MatthewWegner\BpmnEngine\Handlers\NodeHandlerFactory;
+use Saccharine\BpmnEngine\Models\WorkflowVersion;
+use Saccharine\BpmnEngine\Models\WorkflowEdge;
+use Saccharine\BpmnEngine\Models\WorkflowToken;
+use Saccharine\BpmnEngine\Services\GatewayRouter;
+use Saccharine\BpmnEngine\Handlers\NodeHandlerFactory;
 use RuntimeException;
 
 class BpmnInterpreterWorkflow extends Workflow

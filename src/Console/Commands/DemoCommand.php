@@ -1,11 +1,11 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine\Console\Commands;
+namespace Saccharine\BpmnEngine\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use MatthewWegner\BpmnEngine\Models\WorkflowDefinition;
-use MatthewWegner\BpmnEngine\Services\BpmnParserService;
+use Saccharine\BpmnEngine\Models\WorkflowDefinition;
+use Saccharine\BpmnEngine\Services\BpmnParserService;
 
 class DemoCommand extends Command
 {

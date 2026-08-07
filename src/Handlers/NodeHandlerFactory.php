@@ -1,9 +1,9 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine\Handlers;
+namespace Saccharine\BpmnEngine\Handlers;
 
-use MatthewWegner\BpmnEngine\Contracts\BpmnNodeHandlerInterface;
-use MatthewWegner\BpmnEngine\Handlers\Nodes;
+use Saccharine\BpmnEngine\Contracts\BpmnNodeHandlerInterface;
+use Saccharine\BpmnEngine\Handlers\Nodes;
 
 class NodeHandlerFactory
 {

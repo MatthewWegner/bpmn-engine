@@ -1,5 +1,5 @@
 {
-    "name": "matthewwegner/bpmn-engine",
+    "name": "saccharine/bpmn-engine",
     "description": "Laravel BPMN Execution Engine",
     "license": "MIT",
     "keywords": ["laravel", "bpmn", "workflow", "camunda", "orchestration"],
@@ -13,18 +13,18 @@
     "extra": {
         "laravel": {
             "providers": [
-                "MatthewWegner\\BpmnEngine\\BpmnEngineServiceProvider"
+                "Saccharine\\BpmnEngine\\BpmnEngineServiceProvider"
             ]
         }
     },
     "autoload": {
         "psr-4": {
-            "MatthewWegner\\BpmnEngine\\": "src/"
+            "Saccharine\\BpmnEngine\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "MatthewWegner\\BpmnEngine\\Tests\\": "tests/"
+            "Saccharine\\BpmnEngine\\Tests\\": "tests/"
         }
     },
     "authors": [

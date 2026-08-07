@@ -1,9 +1,9 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine\Services;
+namespace Saccharine\BpmnEngine\Services;
 
-use MatthewWegner\BpmnEngine\Models\WorkflowVersion;
-use MatthewWegner\BpmnEngine\Models\WorkflowEdge;
+use Saccharine\BpmnEngine\Models\WorkflowVersion;
+use Saccharine\BpmnEngine\Models\WorkflowEdge;
 use RuntimeException;
 
 class GatewayRouter

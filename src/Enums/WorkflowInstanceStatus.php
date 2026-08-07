@@ -1,6 +1,6 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine\Enums;
+namespace Saccharine\BpmnEngine\Enums;
 
 enum WorkflowInstanceStatus: string
 {

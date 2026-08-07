@@ -1,8 +1,8 @@
 <?php
 
-use MatthewWegner\BpmnEngine\Models\WorkflowDefinition;
-use MatthewWegner\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
-use MatthewWegner\BpmnEngine\Handlers\Nodes\Events\EndEventHandler;
+use Saccharine\BpmnEngine\Models\WorkflowDefinition;
+use Saccharine\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
+use Saccharine\BpmnEngine\Handlers\Nodes\Events\EndEventHandler;
 use Workflow\WorkflowStub;
 
 it('returns a null node ID to terminate the execution path', function () {

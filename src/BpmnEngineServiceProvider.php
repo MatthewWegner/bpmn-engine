@@ -1,12 +1,12 @@
 <?php
 
-namespace MatthewWegner\BpmnEngine;
+namespace Saccharine\BpmnEngine;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
-use MatthewWegner\BpmnEngine\Listeners\WorkflowTriggerListener;
+use Saccharine\BpmnEngine\Listeners\WorkflowTriggerListener;
 
 class BpmnEngineServiceProvider extends ServiceProvider
 {
@@ -34,12 +34,12 @@ class BpmnEngineServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             // Register custom artisan commands
             $this->commands([
-                \MatthewWegner\BpmnEngine\Console\Commands\MakeActivityCommand::class,
-                \MatthewWegner\BpmnEngine\Console\Commands\MakeTriggerCommand::class,
-                \MatthewWegner\BpmnEngine\Console\Commands\MakeTemplateCommand::class,
-                \MatthewWegner\BpmnEngine\Console\Commands\InstallCommand::class,
-                \MatthewWegner\BpmnEngine\Console\Commands\DemoCommand::class,
-                \MatthewWegner\BpmnEngine\Console\Commands\InstanceControlCommand::class,
+                \Saccharine\BpmnEngine\Console\Commands\MakeActivityCommand::class,
+                \Saccharine\BpmnEngine\Console\Commands\MakeTriggerCommand::class,
+                \Saccharine\BpmnEngine\Console\Commands\MakeTemplateCommand::class,
+                \Saccharine\BpmnEngine\Console\Commands\InstallCommand::class,
+                \Saccharine\BpmnEngine\Console\Commands\DemoCommand::class,
+                \Saccharine\BpmnEngine\Console\Commands\InstanceControlCommand::class,
             ]);
 
             // Allow the host app to publish the config file

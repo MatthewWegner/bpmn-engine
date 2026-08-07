@@ -1,7 +1,7 @@
 <?php
 
-use MatthewWegner\BpmnEngine\Models\WorkflowDefinition;
-use MatthewWegner\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
+use Saccharine\BpmnEngine\Models\WorkflowDefinition;
+use Saccharine\BpmnEngine\Workflows\BpmnInterpreterWorkflow;
 use Workflow\Activity;
 use Workflow\WorkflowStub;
 use Illuminate\Support\Facades\Artisan;

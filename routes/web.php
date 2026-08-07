@@ -1,8 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use MatthewWegner\BpmnEngine\Http\Controllers\WorkflowController;
-use MatthewWegner\BpmnEngine\Http\Controllers\WorkflowInstanceController;
+use Saccharine\BpmnEngine\Http\Controllers\WorkflowController;
+use Saccharine\BpmnEngine\Http\Controllers\WorkflowInstanceController;
 
 // The main entry point to view and manage workflows
 Route::get('/definitions', [WorkflowController::class, 'index'])->name('bpmn.index');
